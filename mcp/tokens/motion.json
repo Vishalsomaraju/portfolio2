@@ -1,0 +1,5 @@
+{
+  "micro_hover": { "duration": "0.3s", "ease": "spring" },
+  "medium_transition": { "duration": "0.8s", "ease": "power3.out" },
+  "macro_cinematic": { "duration": "1.4s", "ease": "power4.out" }
+}

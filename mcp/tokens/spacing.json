@@ -1,0 +1,8 @@
+{
+  "spacing": {
+    "section": "8rem",
+    "container": "2rem",
+    "inline": "1rem",
+    "stack": "1.5rem"
+  }
+}
