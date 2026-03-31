@@ -1,30 +1,35 @@
 "use client";
 
-import React, { createContext, useContext, useEffect, useState } from "react";
+import { useEffect } from "react";
+import { useCursorStore } from "@/store/use-cursor-store";
 
-type CursorState = "default" | "hover" | "project" | "cta";
+export function CursorProvider({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  const setPosition = useCursorStore((s) => s.setPosition);
+  const setType = useCursorStore((s) => s.setType);
 
-interface CursorContextType {
-  cursorState: CursorState;
-  setCursorState: (state: CursorState) => void;
-}
+  useEffect(() => {
+    const move = (e: MouseEvent) => {
+      setPosition(e.clientX, e.clientY);
+    };
 
-const CursorContext = createContext<CursorContextType | undefined>(undefined);
+    const handleOver = (e: any) => {
+      const type = e.target?.dataset?.cursor;
+      if (type) setType(type);
+      else setType("default");
+    };
 
-export function CursorProvider({ children }: { children: React.ReactNode }) {
-  const [cursorState, setCursorState] = useState<CursorState>("default");
+    window.addEventListener("mousemove", move);
+    window.addEventListener("mouseover", handleOver);
 
-  return (
-    <CursorContext.Provider value={{ cursorState, setCursorState }}>
-      {children}
-    </CursorContext.Provider>
-  );
-}
+    return () => {
+      window.removeEventListener("mousemove", move);
+      window.removeEventListener("mouseover", handleOver);
+    };
+  }, []);
 
-export function useCursorContext() {
-  const context = useContext(CursorContext);
-  if (context === undefined) {
-    throw new Error("useCursorContext must be used within a CursorProvider");
-  }
-  return context;
+  return <>{children}</>;
 }

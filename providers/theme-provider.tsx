@@ -16,7 +16,7 @@ export function ThemeProvider({ children, defaultTheme = "dark" }: { children: R
 
   return (
     <ThemeContext.Provider value={{ theme, setTheme }}>
-      <div className={theme === "dark" ? "dark" : ""}>
+      <div className={`${theme === "dark" ? "dark" : ""} min-h-screen w-full`}>
         {children}
       </div>
     </ThemeContext.Provider>

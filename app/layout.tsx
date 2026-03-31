@@ -5,6 +5,7 @@ import "./globals.css";
 import { ThemeProvider } from "@/providers/theme-provider";
 import { CursorProvider } from "@/providers/cursor-provider";
 import { LenisProvider } from "@/providers/lenis-provider";
+import Cursor from "@/components/cursor/cursor";
 
 // Note: Replace with Bricolage / DM Sans later according to design system
 const geistSans = localFont({
@@ -30,10 +31,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased bg-base text-primary overflow-x-hidden`}>
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased text-primary overflow-x-hidden`}>
         <ThemeProvider defaultTheme="dark">
           <LenisProvider>
             <CursorProvider>
+              <Cursor />
               {children}
             </CursorProvider>
           </LenisProvider>

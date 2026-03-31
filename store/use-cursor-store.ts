@@ -1,19 +1,23 @@
-import { create } from 'zustand';
+import { create } from "zustand";
 
-type CursorState = 'default' | 'hover' | 'project' | 'cta';
+type CursorType = "default" | "hover" | "project" | "cta" | "drag" | "text";
 
-interface CursorStore {
-  state: CursorState;
-  text: string | null;
+interface CursorState {
+  type: CursorType;
+  setType: (type: CursorType) => void;
+
   position: { x: number; y: number };
-  setState: (state: CursorState, text?: string) => void;
   setPosition: (x: number, y: number) => void;
 }
 
-export const useCursorStore = create<CursorStore>((set) => ({
-  state: 'default',
-  text: null,
+export const useCursorStore = create<CursorState>((set) => ({
+  type: "default",
+
+  setType: (type) => set({ type }),
+
   position: { x: 0, y: 0 },
-  setState: (state, text = null) => set({ state, text }),
-  setPosition: (x, y) => set({ position: { x, y } }),
+  setPosition: (x, y) =>
+    set({
+      position: { x, y },
+    }),
 }));
