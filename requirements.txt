@@ -1,0 +1,14 @@
+# Requirements & Dependencies
+
+react
+react-dom
+next
+typescript
+tailwindcss
+framer-motion
+@studio-freight/lenis
+zustand
+gsap
+three
+@react-three/fiber
+@react-three/drei
