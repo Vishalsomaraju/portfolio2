@@ -1,11 +1,17 @@
 import HeroSection from "@/features/hero/hero-section";
+import AboutSection from "@/features/about/about-section";
+import SkillsSection from "@/features/skills/skills-section";
+import ProjectsSection from "@/features/projects/projects-section";
+import ContactSection from "@/features/contact/contact-section";
 
 export default function Home() {
   return (
-    <main className="w-full">
+    <main style={{ width: "100%", background: "var(--bg)" }}>
       <HeroSection />
-      {/* Temporary spacer for scroll testing */}
-      <div className="h-[200vh] w-full bg-[#0a0a0a]" />
+      <AboutSection />
+      <SkillsSection />
+      <ProjectsSection />
+      <ContactSection />
     </main>
   );
 }

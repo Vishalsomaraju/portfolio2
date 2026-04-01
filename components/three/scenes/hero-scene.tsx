@@ -24,7 +24,7 @@ export default function HeroScene({
       gl={{ antialias: false, alpha: true }}
       style={{ position: "absolute", inset: 0 }}
     >
-      <fog attach="fog" args={["#0a0a0a", 5, 15]} />
+
       <PerformanceMonitor>
         <Suspense fallback={null}>
           <ShootingStar />

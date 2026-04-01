@@ -1,43 +1,52 @@
 import type { Metadata } from "next";
-import localFont from "next/font/local";
+import { Bricolage_Grotesque, DM_Sans } from "next/font/google";
 import "./globals.css";
-
 import { ThemeProvider } from "@/providers/theme-provider";
-import { CursorProvider } from "@/providers/cursor-provider";
 import { LenisProvider } from "@/providers/lenis-provider";
-import Cursor from "@/components/cursor/cursor";
+import { Grain } from "@/components/ui/grain";
+import { Nav } from "@/components/ui/nav";
 
-// Note: Replace with Bricolage / DM Sans later according to design system
-const geistSans = localFont({
-  src: "./fonts/GeistVF.woff",
-  variable: "--font-geist-sans",
-  weight: "100 900",
+const bricolage = Bricolage_Grotesque({
+  subsets: ["latin"],
+  axes: ["opsz", "wdth"],
+  variable: "--font-display",
+  display: "swap",
 });
-const geistMono = localFont({
-  src: "./fonts/GeistMonoVF.woff",
-  variable: "--font-geist-mono",
-  weight: "100 900",
+
+const dmSans = DM_Sans({
+  subsets: ["latin"],
+  variable: "--font-body",
+  display: "swap",
 });
 
 export const metadata: Metadata = {
-  title: "Premium 3D Portfolio",
-  description: "From Chaos to Systems",
+  title: "Vishal Somaraju — Full-Stack Developer",
+  description:
+    "Building precise, scalable architectures and immersive 3D web experiences. Full-Stack Developer open to opportunities.",
+  openGraph: {
+    title: "Vishal Somaraju — Full-Stack Developer",
+    description: "Building digital worlds that feel alive.",
+    type: "website",
+  },
 };
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
-    <html lang="en">
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased text-primary overflow-x-hidden`}>
+    <html
+      lang="en"
+      suppressHydrationWarning
+      className={`${bricolage.variable} ${dmSans.variable}`}
+    >
+      <body>
         <ThemeProvider defaultTheme="dark">
           <LenisProvider>
-            <CursorProvider>
-              <Cursor />
-              {children}
-            </CursorProvider>
+            <Grain />
+            <Nav />
+            {children}
           </LenisProvider>
         </ThemeProvider>
       </body>
