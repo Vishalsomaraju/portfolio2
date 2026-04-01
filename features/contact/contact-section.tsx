@@ -4,15 +4,19 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 
 const socials = [
-  { label: "GitHub",   href: "https://github.com/Vishalsomaraju" },
+  { label: "GitHub", href: "https://github.com/Vishalsomaraju" },
   { label: "LinkedIn", href: "#" },
-  { label: "Twitter",  href: "#" },
+  { label: "Twitter", href: "#" },
 ];
 
 export default function ContactSection() {
-  const [formState, setFormState] = useState({ name: "", email: "", message: "" });
+  const [formState, setFormState] = useState({
+    name: "",
+    email: "",
+    message: "",
+  });
   const [sending, setSending] = useState(false);
-  const [sent,    setSent]    = useState(false);
+  const [sent, setSent] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -35,15 +39,19 @@ export default function ContactSection() {
     transition: "border-color 0.25s, background 0.25s, box-shadow 0.25s",
   };
 
-  const handleFocus = (e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleFocus = (
+    e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>,
+  ) => {
     e.target.style.borderColor = "var(--accent)";
-    e.target.style.background  = "var(--input-bg-focus)";
-    e.target.style.boxShadow   = "0 0 0 3px var(--accent-glow)";
+    e.target.style.background = "var(--input-bg-focus)";
+    e.target.style.boxShadow = "0 0 0 3px var(--accent-glow)";
   };
-  const handleBlur = (e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleBlur = (
+    e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>,
+  ) => {
     e.target.style.borderColor = "var(--input-border)";
-    e.target.style.background  = "var(--input-bg)";
-    e.target.style.boxShadow   = "none";
+    e.target.style.background = "var(--input-bg)";
+    e.target.style.boxShadow = "none";
   };
 
   return (
@@ -51,7 +59,6 @@ export default function ContactSection() {
       id="contact"
       style={{
         position: "relative",
-        background: "var(--bg)",
         padding: "120px 0 0",
         overflow: "hidden",
       }}
@@ -66,7 +73,8 @@ export default function ContactSection() {
           transform: "translateX(-50%)",
           width: "700px",
           height: "500px",
-          background: "radial-gradient(ellipse, var(--hero-glow) 0%, transparent 65%)",
+          background:
+            "radial-gradient(ellipse, var(--hero-glow) 0%, transparent 65%)",
           pointerEvents: "none",
         }}
       />
@@ -105,7 +113,12 @@ export default function ContactSection() {
           >
             Let's build
             <br />
-            <span style={{ WebkitTextStroke: "2px var(--accent)", color: "transparent" }}>
+            <span
+              style={{
+                WebkitTextStroke: "2px var(--accent)",
+                color: "transparent",
+              }}
+            >
               something.
             </span>
           </h2>
@@ -151,23 +164,67 @@ export default function ContactSection() {
                   textAlign: "center",
                 }}
               >
-                <div style={{ fontFamily: "var(--font-display)", fontSize: "2.5rem", marginBottom: "12px" }}>
+                <div
+                  style={{
+                    fontFamily: "var(--font-display)",
+                    fontSize: "2.5rem",
+                    marginBottom: "12px",
+                  }}
+                >
                   ✦
                 </div>
-                <p style={{ fontFamily: "var(--font-display)", fontSize: "1.4rem", fontWeight: 600, color: "var(--text)", marginBottom: "8px" }}>
+                <p
+                  style={{
+                    fontFamily: "var(--font-display)",
+                    fontSize: "1.4rem",
+                    fontWeight: 600,
+                    color: "var(--text)",
+                    marginBottom: "8px",
+                  }}
+                >
                   Message sent!
                 </p>
-                <p style={{ fontFamily: "var(--font-body)", fontSize: "14px", color: "var(--muted)" }}>
+                <p
+                  style={{
+                    fontFamily: "var(--font-body)",
+                    fontSize: "14px",
+                    color: "var(--muted)",
+                  }}
+                >
                   I'll get back to you within 24 hours.
                 </p>
               </div>
             ) : (
-              <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
+              <form
+                onSubmit={handleSubmit}
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "20px",
+                }}
+              >
                 {[
-                  { id: "name",  label: "Name",  type: "text",  placeholder: "Your name" },
-                  { id: "email", label: "Email", type: "email", placeholder: "your@email.com" },
+                  {
+                    id: "name",
+                    label: "Name",
+                    type: "text",
+                    placeholder: "Your name",
+                  },
+                  {
+                    id: "email",
+                    label: "Email",
+                    type: "email",
+                    placeholder: "your@email.com",
+                  },
                 ].map((field) => (
-                  <div key={field.id} style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                  <div
+                    key={field.id}
+                    style={{
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: "8px",
+                    }}
+                  >
                     <label
                       htmlFor={field.id}
                       style={{
@@ -186,9 +243,13 @@ export default function ContactSection() {
                       type={field.type}
                       placeholder={field.placeholder}
                       value={formState[field.id as keyof typeof formState]}
-                      onChange={(e) => setFormState({ ...formState, [field.id]: e.target.value })}
+                      onChange={(e) =>
+                        setFormState({
+                          ...formState,
+                          [field.id]: e.target.value,
+                        })
+                      }
                       required
-
                       style={fieldStyle}
                       onFocus={handleFocus}
                       onBlur={handleBlur}
@@ -196,7 +257,13 @@ export default function ContactSection() {
                   </div>
                 ))}
 
-                <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                <div
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: "8px",
+                  }}
+                >
                   <label
                     htmlFor="message"
                     style={{
@@ -214,32 +281,39 @@ export default function ContactSection() {
                     id="message"
                     placeholder="Tell me about your project..."
                     value={formState.message}
-                    onChange={(e) => setFormState({ ...formState, message: e.target.value })}
+                    onChange={(e) =>
+                      setFormState({ ...formState, message: e.target.value })
+                    }
                     required
                     rows={5}
-
                     style={{ ...fieldStyle, resize: "vertical" }}
-                    onFocus={handleFocus as unknown as React.FocusEventHandler<HTMLTextAreaElement>}
-                    onBlur={handleBlur as unknown as React.FocusEventHandler<HTMLTextAreaElement>}
+                    onFocus={
+                      handleFocus as unknown as React.FocusEventHandler<HTMLTextAreaElement>
+                    }
+                    onBlur={
+                      handleBlur as unknown as React.FocusEventHandler<HTMLTextAreaElement>
+                    }
                   />
                 </div>
 
                 <button
                   type="submit"
                   disabled={sending}
-
                   style={{
                     fontFamily: "var(--font-body)",
                     fontSize: "14px",
                     fontWeight: 600,
                     letterSpacing: "0.05em",
                     color: "white",
-                    background: sending ? "rgba(224,122,95,0.6)" : "var(--accent)",
+                    background: sending
+                      ? "rgba(224,122,95,0.6)"
+                      : "var(--accent)",
                     border: "1px solid var(--accent)",
                     borderRadius: "10px",
                     padding: "16px 32px",
                     cursor: "pointer",
-                    transition: "transform 0.2s, box-shadow 0.2s, background 0.25s",
+                    transition:
+                      "transform 0.2s, box-shadow 0.2s, background 0.25s",
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
@@ -254,8 +328,10 @@ export default function ContactSection() {
                     }
                   }}
                   onMouseOut={(e) => {
-                    (e.currentTarget as HTMLButtonElement).style.transform = "translateY(0)";
-                    (e.currentTarget as HTMLButtonElement).style.boxShadow = "none";
+                    (e.currentTarget as HTMLButtonElement).style.transform =
+                      "translateY(0)";
+                    (e.currentTarget as HTMLButtonElement).style.boxShadow =
+                      "none";
                   }}
                 >
                   {sending ? (
@@ -290,12 +366,21 @@ export default function ContactSection() {
           >
             {/* Email */}
             <div style={{ marginBottom: "48px" }}>
-              <div style={{ fontFamily: "var(--font-body)", fontSize: "11px", fontWeight: 600, letterSpacing: "0.2em", textTransform: "uppercase", color: "var(--label)", marginBottom: "14px" }}>
+              <div
+                style={{
+                  fontFamily: "var(--font-body)",
+                  fontSize: "11px",
+                  fontWeight: 600,
+                  letterSpacing: "0.2em",
+                  textTransform: "uppercase",
+                  color: "var(--label)",
+                  marginBottom: "14px",
+                }}
+              >
                 Email
               </div>
               <a
                 href="mailto:vishal@example.com"
-
                 style={{
                   fontFamily: "var(--font-display)",
                   fontSize: "clamp(1.2rem, 2vw, 1.8rem)",
@@ -305,22 +390,52 @@ export default function ContactSection() {
                   letterSpacing: "-0.02em",
                   transition: "color 0.25s",
                 }}
-                onMouseOver={(e) => { (e.currentTarget as HTMLAnchorElement).style.color = "var(--accent)"; }}
-                onMouseOut={(e)  => { (e.currentTarget as HTMLAnchorElement).style.color = "var(--text)"; }}
+                onMouseOver={(e) => {
+                  (e.currentTarget as HTMLAnchorElement).style.color =
+                    "var(--accent)";
+                }}
+                onMouseOut={(e) => {
+                  (e.currentTarget as HTMLAnchorElement).style.color =
+                    "var(--text)";
+                }}
               >
-                vishal@example.com
+                vishalsomaraju9@gmail.com
               </a>
             </div>
 
             {/* Based in */}
             <div style={{ marginBottom: "48px" }}>
-              <div style={{ fontFamily: "var(--font-body)", fontSize: "11px", fontWeight: 600, letterSpacing: "0.2em", textTransform: "uppercase", color: "var(--label)", marginBottom: "14px" }}>
+              <div
+                style={{
+                  fontFamily: "var(--font-body)",
+                  fontSize: "11px",
+                  fontWeight: 600,
+                  letterSpacing: "0.2em",
+                  textTransform: "uppercase",
+                  color: "var(--label)",
+                  marginBottom: "14px",
+                }}
+              >
                 Based in
               </div>
-              <p style={{ fontFamily: "var(--font-display)", fontSize: "1.4rem", fontWeight: 600, color: "var(--text)", letterSpacing: "-0.02em" }}>
+              <p
+                style={{
+                  fontFamily: "var(--font-display)",
+                  fontSize: "1.4rem",
+                  fontWeight: 600,
+                  color: "var(--text)",
+                  letterSpacing: "-0.02em",
+                }}
+              >
                 Hyderabad, India
                 <br />
-                <span style={{ fontSize: "1rem", color: "var(--muted)", fontWeight: 400 }}>
+                <span
+                  style={{
+                    fontSize: "1rem",
+                    color: "var(--muted)",
+                    fontWeight: 400,
+                  }}
+                >
                   Available remotely worldwide
                 </span>
               </p>
@@ -328,10 +443,26 @@ export default function ContactSection() {
 
             {/* Socials */}
             <div>
-              <div style={{ fontFamily: "var(--font-body)", fontSize: "11px", fontWeight: 600, letterSpacing: "0.2em", textTransform: "uppercase", color: "var(--label)", marginBottom: "20px" }}>
+              <div
+                style={{
+                  fontFamily: "var(--font-body)",
+                  fontSize: "11px",
+                  fontWeight: 600,
+                  letterSpacing: "0.2em",
+                  textTransform: "uppercase",
+                  color: "var(--label)",
+                  marginBottom: "20px",
+                }}
+              >
                 Find me on
               </div>
-              <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "12px",
+                }}
+              >
                 {socials.map((s) => (
                   <a
                     key={s.label}
@@ -350,12 +481,24 @@ export default function ContactSection() {
                       transition: "color 0.25s",
                       width: "fit-content",
                     }}
-                    onMouseOver={(e) => { (e.currentTarget as HTMLAnchorElement).style.color = "var(--text)"; }}
-                    onMouseOut={(e)  => { (e.currentTarget as HTMLAnchorElement).style.color = "var(--muted)"; }}
+                    onMouseOver={(e) => {
+                      (e.currentTarget as HTMLAnchorElement).style.color =
+                        "var(--text)";
+                    }}
+                    onMouseOut={(e) => {
+                      (e.currentTarget as HTMLAnchorElement).style.color =
+                        "var(--muted)";
+                    }}
                   >
                     {s.label}
                     <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
-                      <path d="M1 9L9 1M9 1H3M9 1V7" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                      <path
+                        d="M1 9L9 1M9 1H3M9 1V7"
+                        stroke="currentColor"
+                        strokeWidth="1.5"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
                     </svg>
                   </a>
                 ))}
@@ -378,10 +521,22 @@ export default function ContactSection() {
           gap: "12px",
         }}
       >
-        <span style={{ fontFamily: "var(--font-body)", fontSize: "12px", color: "var(--faint)" }}>
+        <span
+          style={{
+            fontFamily: "var(--font-body)",
+            fontSize: "12px",
+            color: "var(--faint)",
+          }}
+        >
           © 2025 Vishal Somaraju. Crafted with intention.
         </span>
-        <span style={{ fontFamily: "var(--font-body)", fontSize: "12px", color: "var(--faint)" }}>
+        <span
+          style={{
+            fontFamily: "var(--font-body)",
+            fontSize: "12px",
+            color: "var(--faint)",
+          }}
+        >
           Next.js · R3F · GSAP · Framer
         </span>
       </div>

@@ -243,7 +243,6 @@ export default function ProjectsSection() {
       ref={sectionRef}
       style={{
         position: "relative",
-        background: "var(--bg)",
         padding: "120px 0 140px",
         overflow: "hidden",
       }}
@@ -392,8 +391,6 @@ export default function ProjectsSection() {
           </a>
         </motion.div>
       </div>
-
-      <div className="section-divider" style={{ marginTop: "120px" }} />
 
       <style>{`
         @media (max-width: 768px) {

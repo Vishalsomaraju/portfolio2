@@ -9,14 +9,14 @@ const skills = [
   { name: "JavaScript", accent: "#F7DF1E" },
   { name: "TypeScript", accent: "#3178C6" },
   { name: "React", accent: "#61DAFB" },
-  { name: "Next.js", accent: "#ffffff" },
+  { name: "Next.js", accent: "#000000" }, // specific handling for Next.js in SVG
   { name: "Node.js", accent: "#5FA04E" },
   { name: "Python", accent: "#3776AB" },
-  { name: "Flask", accent: "#ffffff" },
+  { name: "Flask", accent: "#000000" },
   { name: "FastAPI", accent: "#009688" },
   { name: "MySQL", accent: "#4479A1" },
   { name: "Tailwind CSS", accent: "#38BDF8" },
-  { name: "Three.js", accent: "#ffffff" },
+  { name: "Three.js", accent: "#000000" },
   { name: "GSAP", accent: "#88CE02" },
 ];
 
@@ -129,32 +129,52 @@ function SkillIcon({ name }: { name: string }) {
   }
 }
 
-function SkillTile({ skill, index }: { skill: any; index: number }) {
+function SkillTile({ skill, index, scrollYProgress }: { skill: any; index: number, scrollYProgress: any }) {
+  // Parallax effect
+  const yParallax = useTransform(scrollYProgress, [0, 1], [0, -30 + (index % 3) * -20]);
+
   return (
     <motion.div
       className="skill-tile boxed-tile"
       style={{
         ["--skill-accent" as string]: skill.accent,
+        y: yParallax,
       }}
-      initial={{ opacity: 0, scale: 0.95 }}
-      whileInView={{ opacity: 1, scale: 1 }}
+      initial={{ opacity: 0, y: 30, scale: 0.95 }}
+      whileInView={{ opacity: 1, y: 0, scale: 1 }}
       viewport={{ once: true, margin: "-40px" }}
       transition={{
-        duration: 0.4,
-        delay: index * 0.04,
-        ease: [0.16, 1, 0.3, 1],
+        duration: 0.6,
+        delay: index * 0.05,
+        ease: [1, 0.4, 0, 1.2],
       }}
-      whileHover={{ scale: 1.05, y: -6, zIndex: 10 }} // Snap back to normal precisely
+      whileHover={{ y: -6, scale: 1.05 }}
     >
-      <div className="skill-icon-wrap">
+      <motion.div
+        className="skill-icon-wrap"
+        animate={{
+          y: [0, -5, 0],
+          rotate: [0, index % 2 === 0 ? 2 : -2, 0],
+        }}
+        transition={{
+          duration: 4 + (index % 4) * 0.6,
+          repeat: Number.POSITIVE_INFINITY,
+          repeatType: "mirror",
+          ease: "easeInOut",
+        }}
+      >
         <SkillIcon name={skill.name} />
-      </div>
+      </motion.div>
     </motion.div>
   );
 }
 
 export default function SkillsSection() {
   const containerRef = useRef<HTMLDivElement>(null);
+  const { scrollYProgress } = useScroll({
+    target: containerRef,
+    offset: ["start end", "end start"]
+  });
 
   return (
     <section
@@ -162,6 +182,7 @@ export default function SkillsSection() {
       ref={containerRef}
       style={{
         position: "relative",
+        background: "var(--bg)",
         padding: "160px 0 200px",
         overflow: "hidden",
       }}
@@ -192,81 +213,52 @@ export default function SkillsSection() {
         }}
       />
 
-      <div style={{ maxWidth: "1200px", margin: "0 auto", padding: "0 40px" }}>
+      <div style={{ maxWidth: "1100px", margin: "0 auto", padding: "0 40px" }}>
         
-        {/* Chapter label */}
         <motion.div
-          initial={{ opacity: 0, x: -20 }}
+          initial={{ opacity: 0, x: -25 }}
           whileInView={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-          viewport={{ once: true, margin: "-80px" }}
-          className="chapter-label"
-          style={{ marginBottom: "48px" }}
+          transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+          viewport={{ once: true, margin: "-100px" }}
+          style={{ marginBottom: "64px", position: "relative" }}
         >
-          02 — Expertise
-        </motion.div>
-
-        {/* Heading row */}
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "flex-end",
-            marginBottom: "72px",
-            gap: "40px",
-            flexWrap: "wrap",
-          }}
-        >
-          <motion.h2
-            initial={{ opacity: 0, y: 40 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
-            viewport={{ once: true, margin: "-60px" }}
+          <div style={{
+            position: "absolute",
+            bottom: "-16px",
+            left: "0",
+            width: "120px",
+            height: "1px",
+            background: "linear-gradient(90deg, color-mix(in srgb, var(--accent) 50%, transparent) 0%, transparent 100%)"
+          }} />
+          <h2
             style={{
               fontFamily: "var(--font-display)",
-              fontSize: "clamp(2.8rem, 5.5vw, 5.5rem)",
-              fontWeight: 720,
-              lineHeight: 1.0,
-              letterSpacing: "-0.03em",
+              fontSize: "clamp(3.2rem, 6vw, 6rem)",
+              fontWeight: 700,
+              lineHeight: 0.9,
+              letterSpacing: "-0.05em",
               color: "var(--text)",
             }}
           >
-            Technical
-            <br />
-            <span style={{ color: "var(--accent)" }}>arsenal.</span>
-          </motion.h2>
-
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
-            viewport={{ once: true, margin: "-60px" }}
-            style={{
-              fontFamily: "var(--font-body)",
-              fontSize: "14px",
-              color: "var(--muted)",
-              maxWidth: "280px",
-              lineHeight: 1.7,
-            }}
-          >
-            Core technologies and tools I utilize to build scalable, high-performance web experiences.
-          </motion.p>
-        </div>
+            Skills
+          </h2>
+        </motion.div>
 
         <div className="constellation-wall">
           {skills.map((skill, index) => (
-            <SkillTile key={skill.name} skill={skill} index={index} />
+            <SkillTile key={skill.name} skill={skill} index={index} scrollYProgress={scrollYProgress} />
           ))}
         </div>
       </div>
 
-      <style dangerouslySetInnerHTML={{ __html: `
+      <style dangerouslySetInnerHTML={{ __html: \`
         .constellation-wall {
-          display: grid;
-          grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-          gap: 24px;
-          justify-items: center;
-          padding: 20px 0;
+          display: flex;
+          flex-wrap: wrap;
+          gap: 20px;
+          justify-content: center;
+          align-items: center;
+          padding: 40px 0;
           perspective: 1200px;
         }
 
@@ -278,7 +270,7 @@ export default function SkillsSection() {
           display: flex;
           align-items: center;
           justify-content: center;
-          background: rgba(14, 17, 21, 0.8);
+          background: #080a0e;
           border: 1px solid rgba(255, 255, 255, 0.05);
           backdrop-filter: blur(16px);
           box-shadow:
@@ -286,7 +278,6 @@ export default function SkillsSection() {
             0 24px 48px rgba(0, 0, 0, 0.4);
           transform-style: preserve-3d;
           transition: border-color 0.4s ease, box-shadow 0.4s ease;
-          cursor: default;
         }
 
         .boxed-tile::before {
@@ -336,7 +327,7 @@ export default function SkillsSection() {
 
         /* Light Mode Rules */
         .light .boxed-tile {
-          background: rgba(219, 207, 185, 0.8);
+          background: #dbcfb9;
           border: 1px solid rgba(70, 53, 34, 0.1);
           box-shadow:
             inset 0 1px 0 rgba(255, 255, 255, 0.6),
@@ -367,7 +358,6 @@ export default function SkillsSection() {
         @media (max-width: 900px) {
           .constellation-wall {
             gap: 16px;
-            grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
           }
           .boxed-tile {
             width: 110px;
@@ -379,7 +369,6 @@ export default function SkillsSection() {
         @media (max-width: 600px) {
           .constellation-wall {
             gap: 12px;
-            grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
           }
           .boxed-tile {
             width: 90px;
@@ -387,7 +376,7 @@ export default function SkillsSection() {
             border-radius: 14px;
           }
         }
-      ` }} />
+      \` }} />
     </section>
   );
 }

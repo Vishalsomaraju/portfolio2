@@ -83,7 +83,6 @@ export default function AboutSection() {
       ref={sectionRef}
       style={{
         position: "relative",
-        background: "var(--bg)",
         padding: "160px 0 140px",
         overflow: "hidden",
       }}
@@ -279,9 +278,6 @@ export default function AboutSection() {
           </div>
         </div>
       </div>
-
-      {/* Bottom divider */}
-      <div className="section-divider" style={{ marginTop: "120px" }} />
 
       <style>{`
         @media (max-width: 768px) {

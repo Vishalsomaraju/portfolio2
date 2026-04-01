@@ -1,34 +1,13 @@
-import type { Metadata } from "next";
-import { Bricolage_Grotesque, DM_Sans } from "next/font/google";
+"use client";
+
 import "./globals.css";
 import { ThemeProvider } from "@/providers/theme-provider";
+import { CursorProvider } from "@/providers/cursor-provider";
 import { LenisProvider } from "@/providers/lenis-provider";
+import Cursor from "@/components/cursor/cursor";
 import { Grain } from "@/components/ui/grain";
 import { Nav } from "@/components/ui/nav";
-
-const bricolage = Bricolage_Grotesque({
-  subsets: ["latin"],
-  axes: ["opsz", "wdth"],
-  variable: "--font-display",
-  display: "swap",
-});
-
-const dmSans = DM_Sans({
-  subsets: ["latin"],
-  variable: "--font-body",
-  display: "swap",
-});
-
-export const metadata: Metadata = {
-  title: "Vishal Somaraju — Full-Stack Developer",
-  description:
-    "Building precise, scalable architectures and immersive 3D web experiences. Full-Stack Developer open to opportunities.",
-  openGraph: {
-    title: "Vishal Somaraju — Full-Stack Developer",
-    description: "Building digital worlds that feel alive.",
-    type: "website",
-  },
-};
+import { Preloader } from "@/components/ui/preloader";
 
 export default function RootLayout({
   children,
@@ -36,17 +15,32 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html
-      lang="en"
-      suppressHydrationWarning
-      className={`${bricolage.variable} ${dmSans.variable}`}
-    >
+    <html lang="en" suppressHydrationWarning>
+      <head>
+        {/* Blocking script — runs before first paint to prevent theme flash */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{var t=localStorage.getItem('portfolio-theme');if(t==='light'){document.documentElement.classList.add('light');}else{document.documentElement.classList.remove('light');}}catch(e){}})();`,
+          }}
+        />
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link
+          rel="preconnect"
+          href="https://fonts.gstatic.com"
+          crossOrigin="anonymous"
+        />
+      </head>
       <body>
         <ThemeProvider defaultTheme="dark">
           <LenisProvider>
-            <Grain />
-            <Nav />
-            {children}
+            <CursorProvider>
+              {/* Preloader sits on top of everything — unmounts itself after done */}
+              <Preloader />
+              <Grain />
+              <Cursor />
+              <Nav />
+              {children}
+            </CursorProvider>
           </LenisProvider>
         </ThemeProvider>
       </body>

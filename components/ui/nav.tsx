@@ -68,8 +68,11 @@ function IconX() {
 export function Nav() {
   const [scrolled,  setScrolled]  = useState(false);
   const [menuOpen,  setMenuOpen]  = useState(false);
+  const [mounted,   setMounted]   = useState(false);
   const { theme, setTheme }       = useTheme();
   const isDark                    = theme === "dark";
+
+  useEffect(() => setMounted(true), []);
 
   // Scroll detection
   useEffect(() => {
@@ -200,16 +203,18 @@ export function Nav() {
             }}
           >
             <AnimatePresence mode="wait" initial={false}>
-              <motion.span
-                key={theme}
-                initial={{ opacity: 0, scale: 0.5, rotate: -20 }}
-                animate={{ opacity: 1, scale: 1, rotate: 0 }}
-                exit={{ opacity: 0, scale: 0.5, rotate: 20 }}
-                transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
-                style={{ display: "flex", alignItems: "center", justifyContent: "center" }}
-              >
-                {isDark ? <IconMoon /> : <IconSun />}
-              </motion.span>
+              {mounted && (
+                <motion.span
+                  key={theme}
+                  initial={{ opacity: 0, scale: 0.5, rotate: -20 }}
+                  animate={{ opacity: 1, scale: 1, rotate: 0 }}
+                  exit={{ opacity: 0, scale: 0.5, rotate: 20 }}
+                  transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
+                  style={{ display: "flex", alignItems: "center", justifyContent: "center" }}
+                >
+                  {isDark ? <IconMoon /> : <IconSun />}
+                </motion.span>
+              )}
             </AnimatePresence>
           </motion.button>
 
@@ -472,16 +477,18 @@ export function Nav() {
                   }}
                 >
                   <AnimatePresence mode="wait" initial={false}>
-                    <motion.span
-                      key={theme + "-mobile"}
-                      initial={{ opacity: 0, scale: 0.5 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      exit={{ opacity: 0, scale: 0.5 }}
-                      transition={{ duration: 0.16 }}
-                      style={{ display: "flex", alignItems: "center", justifyContent: "center" }}
-                    >
-                      {isDark ? <IconMoon /> : <IconSun />}
-                    </motion.span>
+                    {mounted && (
+                      <motion.span
+                        key={theme + "-mobile"}
+                        initial={{ opacity: 0, scale: 0.5 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.5 }}
+                        transition={{ duration: 0.16 }}
+                        style={{ display: "flex", alignItems: "center", justifyContent: "center" }}
+                      >
+                        {isDark ? <IconMoon /> : <IconSun />}
+                      </motion.span>
+                    )}
                   </AnimatePresence>
                 </motion.button>
 
