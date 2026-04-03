@@ -83,23 +83,23 @@ export default function AboutSection() {
       ref={sectionRef}
       style={{
         position: "relative",
-        padding: "160px 0 140px",
+        padding: "120px 0 140px",
         overflow: "hidden",
+        background: "var(--bg)",
       }}
     >
-      {/* Subtle top glow */}
+      {/* Top fade — blends into hero below, no hard line */}
       <div
         aria-hidden="true"
         style={{
           position: "absolute",
           top: 0,
-          left: "50%",
-          transform: "translateX(-50%)",
-          width: "600px",
-          height: "1px",
-          background:
-            "linear-gradient(to right, transparent, var(--accent), transparent)",
+          left: 0,
+          right: 0,
+          height: "180px",
+          background: "linear-gradient(to bottom, var(--bg), transparent)",
           pointerEvents: "none",
+          zIndex: 1,
         }}
       />
 

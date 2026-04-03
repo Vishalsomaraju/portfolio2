@@ -61,8 +61,23 @@ export default function ContactSection() {
         position: "relative",
         padding: "120px 0 0",
         overflow: "hidden",
+        background: "var(--bg)",
       }}
     >
+      {/* Top fade — blends into previous section */}
+      <div
+        aria-hidden="true"
+        style={{
+          position: "absolute",
+          top: 0,
+          left: 0,
+          right: 0,
+          height: "120px",
+          background: "linear-gradient(to bottom, var(--bg), transparent)",
+          pointerEvents: "none",
+          zIndex: 1,
+        }}
+      />
       {/* Ambient glow */}
       <div
         aria-hidden="true"

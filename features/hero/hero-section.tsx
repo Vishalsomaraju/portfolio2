@@ -115,37 +115,6 @@ export default function HeroSection() {
     const onMove = (e: MouseEvent) => {
       mouse.x = (e.clientX / window.innerWidth - 0.5) * 2;
       mouse.y = (e.clientY / window.innerHeight - 0.5) * 2;
-
-      // Magnetic buttons
-      [btn1Ref, btn2Ref].forEach((ref) => {
-        if (!ref.current) return;
-        const rect = ref.current.getBoundingClientRect();
-        const cx = rect.left + rect.width / 2;
-        const cy = rect.top + rect.height / 2;
-        const dx = e.clientX - cx;
-        const dy = e.clientY - cy;
-        const dist = Math.sqrt(dx * dx + dy * dy);
-        const threshold = 110;
-
-        if (dist < threshold) {
-          const pull = ((threshold - dist) / threshold) * 0.38;
-          gsap.to(ref.current, {
-            x: dx * pull,
-            y: dy * pull,
-            duration: 0.5,
-            ease: "power2.out",
-            overwrite: true,
-          });
-        } else {
-          gsap.to(ref.current, {
-            x: 0,
-            y: 0,
-            duration: 0.7,
-            ease: "elastic.out(1, 0.4)",
-            overwrite: true,
-          });
-        }
-      });
     };
 
     const tick = () => {
@@ -164,9 +133,9 @@ export default function HeroSection() {
       if (subtextRef.current) {
         subtextRef.current.style.transform = `translate(${smooth.x * -8}px, ${smooth.y * -5}px)`;
       }
-      // CTA — very subtle
+      // CTA — fixed, no parallax
       if (ctaRef.current) {
-        ctaRef.current.style.transform = `translate(${smooth.x * -5}px, ${smooth.y * -3}px)`;
+        ctaRef.current.style.transform = "translate(0px, 0px)";
       }
       // Ambient glow drifts with cursor
       if (glowRef.current) {
@@ -322,10 +291,10 @@ export default function HeroSection() {
           bottom: 0,
           left: 0,
           right: 0,
-          height: "32%",
+          height: "45%",
           zIndex: 3,
           pointerEvents: "none",
-          background: "linear-gradient(to bottom, transparent, var(--bg))",
+          background: "linear-gradient(to bottom, transparent 0%, var(--bg) 85%)",
         }}
       />
 
@@ -621,8 +590,8 @@ export default function HeroSection() {
           </motion.p>
         </div>
 
-        {/* CTAs — magnetic, depth layer 4 */}
-        <div ref={ctaRef} style={{ willChange: "transform" }}>
+        {/* CTAs — fixed position, no magnetic/parallax */}
+        <div ref={ctaRef}>
           <motion.div
             {...fadeUp(0.78)}
             style={{

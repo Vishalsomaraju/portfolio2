@@ -1,177 +1,313 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import gsap from "gsap";
+import { useEffect, useState, useCallback, useMemo } from "react";
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { useSiteStore } from "@/store/use-site-store";
+import { useTheme } from "@/providers/theme-provider";
+
+const FULL_NAME = "Vishal Somaraju";
+const VS_IDX = new Set([0, 7]);
+
+type Phase = "idle" | "typing" | "hold" | "transform" | "split";
+
+const E_SNAP: [number, number, number, number] = [0.22, 1, 0.36, 1];
+const E_CINEMA: [number, number, number, number] = [0.76, 0, 0.24, 1];
 
 export function Preloader() {
+  const [phase, setPhase] = useState<Phase>("typing");
   const [active, setActive] = useState(true);
   const setLoaded = useSiteStore((s) => s.setLoaded);
+  const prefersReduced = useReducedMotion();
+  const { theme } = useTheme();
+  const isDark = theme === "dark";
 
-  const wrapRef = useRef<HTMLDivElement>(null);
-  const topRef = useRef<HTMLDivElement>(null);
-  const botRef = useRef<HTMLDivElement>(null);
-  const numRef = useRef<HTMLSpanElement>(null);
-  const tagRef = useRef<HTMLSpanElement>(null);
-  const contentRef = useRef<HTMLDivElement>(null);
-  const barFillRef = useRef<HTMLDivElement>(null);
+  // ── Theme-aware tokens ──────────────────────────────────────────────
+  const BG      = isDark ? "#0a0a0a"                     : "#f4f0e7";
+  const TEXT    = isDark ? "#eaeaea"                     : "#1a1814";
+  const PANEL   = isDark ? "#0a0a0a"                     : "#f4f0e7";
+  const BAR_BG  = isDark ? "rgba(255,255,255,0.05)"       : "rgba(0,0,0,0.07)";
+  const BAR_FG  = isDark ? "rgba(224,122,95,0.75)"       : "rgba(201,102,68,0.75)";
+  const LABEL   = isDark ? "rgba(240,237,232,0.22)"      : "rgba(26,24,20,0.30)";
+  const GLOW    = isDark ? "rgba(140,110,255,0.07)"      : "rgba(201,102,68,0.06)";
+
+  const CFG = {
+    perLetter: 60,
+    letterDur: 400,
+    holdDelay: 900,
+    transformDur: 850,
+    panelDelay: 140,
+    panelDur: 820,
+    lockInDur: 550,
+  };
+
+  // ✅ Stable organic delays — dep on perLetter so they're always in sync
+  const delays = useMemo(
+    () =>
+      FULL_NAME.split("").map(
+        (_, i) => (i * CFG.perLetter + Math.random() * 12) / 1000,
+      ),
+    [CFG.perLetter],
+  );
+
+  const times = () => {
+    const typeEnd = FULL_NAME.length * CFG.perLetter + CFG.letterDur;
+    const holdEnd = typeEnd + CFG.holdDelay;
+    const xfrmEnd = holdEnd + CFG.transformDur;
+    const doneEnd = xfrmEnd + CFG.panelDelay + CFG.panelDur;
+    return { typeEnd, holdEnd, xfrmEnd, doneEnd };
+  };
+
+  const finish = useCallback(() => {
+    setLoaded();
+    setActive(false);
+  }, [setLoaded]);
 
   useEffect(() => {
-    if (!active) return;
+    if (!prefersReduced) return;
+    const id = setTimeout(finish, 150);
+    return () => clearTimeout(id);
+  }, [prefersReduced, finish]);
 
-    const tl = gsap.timeline();
+  useEffect(() => {
+    if (!active || prefersReduced) return;
 
-    // 1 — counter 0 → 100  (1.4s, power2.in so it accelerates)
-    const proxy = { val: 0 };
-    tl.to(proxy, {
-      val: 100,
-      duration: 1.4,
-      ease: "power2.in",
-      onUpdate() {
-        const v = Math.floor(proxy.val);
-        if (numRef.current)
-          numRef.current.textContent = String(v).padStart(2, "0");
-        if (barFillRef.current) barFillRef.current.style.width = v + "%";
-      },
-    });
+    const { typeEnd, holdEnd, xfrmEnd, doneEnd } = times();
+    const O = 80;
 
-    // 2 — hold at 100 briefly
-    tl.to({}, { duration: 0.28 });
+    const ids = [
+      setTimeout(() => setPhase("typing"), O),
+      setTimeout(() => setPhase("hold"), typeEnd + O),
+      setTimeout(() => setPhase("transform"), holdEnd + O),
+      setTimeout(() => setPhase("split"), xfrmEnd + CFG.panelDelay + O),
+      setTimeout(() => finish(), doneEnd + 200),
+    ];
 
-    // 3 — content fades out, panels split simultaneously
-    tl.to(
-      contentRef.current,
-      { opacity: 0, duration: 0.22, ease: "power2.in" },
-      "<",
-    );
-    tl.to(
-      topRef.current,
-      { y: "-100%", duration: 0.85, ease: "power4.inOut" },
-      "<0.08",
-    );
-    tl.to(
-      botRef.current,
-      {
-        y: "100%",
-        duration: 0.85,
-        ease: "power4.inOut",
-        onComplete() {
-          setLoaded();
-          setActive(false);
-        },
-      },
-      "<",
-    );
-  }, []);
+    return () => ids.forEach(clearTimeout);
+  }, [active, prefersReduced, finish]);
 
   if (!active) return null;
 
+  const showFullName =
+    phase === "typing" || phase === "hold" || phase === "idle";
+  const isHold = phase === "hold";
+  const isTransform = phase === "transform" || phase === "split";
+  const isSplit = phase === "split";
+
+  const vsToX = "calc(-50vw + clamp(20px, 5vw, 56px) + 18px)";
+  const vsToY = "calc(-50vh + 34px)";
+  const vsScale = 0.17; // ✅ refined
+
+  const textBase: React.CSSProperties = {
+    fontFamily: "var(--font-display)",
+    fontSize: "clamp(2.2rem, 6.5vw, 5.5rem)",
+    fontWeight: 800,
+    lineHeight: 1,
+    userSelect: "none",
+    whiteSpace: "nowrap",
+    color: TEXT,
+  };
+
   return (
     <div
-      ref={wrapRef}
-      aria-hidden="true"
-      style={{
-        position: "fixed",
-        inset: 0,
-        zIndex: 99999,
-        pointerEvents: "none",
-      }}
+      className="fixed inset-0 z-[99999] pointer-events-none overflow-hidden"
+      style={{ background: BG }}
     >
-      {/* Top panel */}
-      <div
-        ref={topRef}
-        style={{
-          position: "absolute",
-          top: 0,
-          left: 0,
-          right: 0,
-          height: "50%",
-          background: "#080808",
-        }}
-      />
-
-      {/* Bottom panel */}
-      <div
-        ref={botRef}
-        style={{
-          position: "absolute",
-          bottom: 0,
-          left: 0,
-          right: 0,
-          height: "50%",
-          background: "#080808",
-        }}
-      />
-
-      {/* Content — floats above both panels */}
-      <div
-        ref={contentRef}
+      {/* Hold-phase ambient glow */}
+      <motion.div
+        animate={{ opacity: isHold ? 1 : 0 }}
+        transition={{ duration: CFG.lockInDur / 1000 }}
         style={{
           position: "absolute",
           inset: 0,
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          justifyContent: "center",
-          gap: "24px",
-          zIndex: 1,
+          background: `radial-gradient(ellipse 60% 50% at 50% 50%, ${GLOW}, transparent)`,
+        }}
+      />
+
+      {/* Panels */}
+      <motion.div
+        animate={{ y: isSplit ? "-100%" : "0%" }}
+        transition={{ duration: CFG.panelDur / 1000, ease: E_CINEMA }}
+        style={{ position: "absolute", top: 0, left: 0, right: 0, height: "50%", background: PANEL, zIndex: 10 }}
+      />
+      <motion.div
+        animate={{ y: isSplit ? "100%" : "0%" }}
+        transition={{ duration: CFG.panelDur / 1000, ease: E_CINEMA }}
+        style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: "50%", background: PANEL, zIndex: 10 }}
+      />
+
+      {/* Content — above the panels (z-20 > panel z-10) */}
+      <div className="absolute inset-0 flex items-center justify-center z-20">
+        {/* NAME */}
+        <AnimatePresence>
+          {showFullName && (
+            <motion.div
+              key="name"
+              animate={{ scale: isHold ? 1.03 : 1 }}
+              exit={{ opacity: 0, y: 12 }}
+              transition={{ duration: CFG.lockInDur / 1000, ease: E_SNAP }}
+              style={{
+                ...textBase,
+                display: "flex",
+                letterSpacing: isHold ? "-0.03em" : "0.06em",
+                transition: `letter-spacing ${CFG.lockInDur}ms cubic-bezier(0.22,1,0.36,1)`,
+              }}
+            >
+              {FULL_NAME.split("").map((char, i) =>
+                char === " " ? (
+                  <span key={i} style={{ width: "0.35em" }} />
+                ) : (
+                  <motion.span
+                    key={i}
+                    initial={{ opacity: 0, filter: "blur(10px)", y: 8 }}
+                    animate={{ opacity: 1, filter: "blur(0px)", y: 0 }}
+                    transition={{
+                      duration: CFG.letterDur / 1000,
+                      delay: delays[i],
+                      ease: E_SNAP,
+                    }}
+                    style={{ display: "inline-block" }}
+                  >
+                    {char}
+                  </motion.span>
+                ),
+              )}
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* TRANSFORM */}
+        <AnimatePresence>
+          {isTransform && (
+            <>
+              <motion.div className="absolute flex" style={textBase}>
+                {FULL_NAME.split("").map((char, i) => {
+                  if (char === " ")
+                    return <span key={i} style={{ width: "0.35em" }} />;
+
+                  const isVS = VS_IDX.has(i);
+                  const center = FULL_NAME.length / 2;
+                  const dist = Math.abs(i - center);
+
+                  // 🟢 VS letters → stay, then fade later
+                  if (isVS) {
+                    return (
+                      <motion.span
+                        key={i}
+                        initial={{ opacity: 1 }}
+                        animate={{
+                          opacity: 0, // fades AFTER delay
+                        }}
+                        transition={{
+                          duration: 0.2,
+                          delay: 0.3, // ⬅️ IMPORTANT (wait before fading)
+                          ease: "easeOut",
+                        }}
+                      >
+                        {char}
+                      </motion.span>
+                    );
+                  }
+
+                  // 🔴 Other letters → fade immediately
+                  return (
+                    <motion.span
+                      key={i}
+                      initial={{ opacity: 1 }}
+                      animate={{
+                        opacity: 0,
+                        y: 14 + dist * 2,
+                        filter: `blur(${2 + dist * 0.4}px)`,
+                      }}
+                      transition={{
+                        duration: 0.4,
+                        delay: 0.02 + dist * 0.015,
+                        ease: "easeIn",
+                      }}
+                    >
+                      {char}
+                    </motion.span>
+                  );
+                })}
+              </motion.div>
+
+              {/* VS */}
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{
+                  x: vsToX,
+                  y: vsToY,
+                  scale: [1, 1.04, vsScale], // ✅ tension added
+                  opacity: 1,
+                }}
+                transition={{
+                  duration: CFG.transformDur / 1000,
+                  ease: E_CINEMA,
+                }}
+                style={{
+                  ...textBase,
+                  position: "absolute",
+                  letterSpacing: "-0.03em",
+                }}
+              >
+                VS<span style={{ color: "var(--accent)" }}>.</span>
+              </motion.div>
+            </>
+          )}
+        </AnimatePresence>
+      </div>
+
+      {/* ── Progress bar ─────────────────────────────────────────────── */}
+      <motion.div
+        animate={isTransform ? { opacity: 0, scaleX: 0 } : { opacity: 1, scaleX: 1 }}
+        transition={{ duration: 0.3, ease: "easeIn" }}
+        style={{
+          position: "absolute",
+          bottom: "clamp(48px, 7vh, 72px)",
+          left: "clamp(40px, 8vw, 80px)",
+          right: "clamp(40px, 8vw, 80px)",
+          height: "1px",
+          background: BAR_BG,
+          transformOrigin: "left",
+          zIndex: 20,
         }}
       >
-        {/* Counter */}
-        <span
-          ref={numRef}
-          style={{
-            fontFamily: "var(--font-display)",
-            fontSize: "clamp(5rem, 16vw, 14rem)",
-            fontWeight: 800,
-            lineHeight: 1,
-            letterSpacing: "-0.05em",
-            color: "var(--text)",
-            fontVariantNumeric: "tabular-nums",
-            userSelect: "none",
+        <motion.div
+          initial={{ width: "0%" }}
+          animate={{ width: isHold || isTransform ? "100%" : "55%" }}
+          transition={{
+            duration: isHold
+              ? 0.28
+              : FULL_NAME.length * (CFG.perLetter / 1000) + CFG.letterDur / 1000,
+            ease: isHold ? E_SNAP : "linear",
           }}
-        >
-          00
-        </span>
+          style={{
+            height: "100%",
+            background: `linear-gradient(to right, ${BAR_FG}, transparent)`,
+          }}
+        />
+      </motion.div>
 
-        {/* Label */}
-        <span
-          ref={tagRef}
-          style={{
-            fontFamily: "var(--font-body)",
-            fontSize: "10px",
-            fontWeight: 500,
-            letterSpacing: "0.35em",
-            textTransform: "uppercase",
-            color: "rgba(240,237,232,0.25)",
-          }}
-        >
-          Loading experience
-        </span>
-
-        {/* Thin progress bar */}
-        <div
-          style={{
-            position: "absolute",
-            bottom: "40px",
-            left: "40px",
-            right: "40px",
-            height: "1px",
-            background: "rgba(255,255,255,0.06)",
-          }}
-        >
-          <div
-            ref={barFillRef}
-            style={{
-              height: "100%",
-              width: "0%",
-              background:
-                "linear-gradient(to right, var(--accent), rgba(224,122,95,0.3))",
-              transition: "none",
-            }}
-          />
-        </div>
-      </div>
+      {/* ── Label ────────────────────────────────────────────────────── */}
+      <motion.span
+        animate={isTransform ? { opacity: 0, y: 6 } : { opacity: 1, y: 0 }}
+        transition={{ duration: 0.26 }}
+        style={{
+          position: "absolute",
+          bottom: "clamp(28px, 4vh, 44px)",
+          left: "50%",
+          transform: "translateX(-50%)",
+          fontFamily: "var(--font-body)",
+          fontSize: "10px",
+          fontWeight: 500,
+          letterSpacing: "0.32em",
+          textTransform: "uppercase",
+          color: LABEL,
+          zIndex: 20,
+          whiteSpace: "nowrap",
+        }}
+      >
+        Loading experience
+      </motion.span>
     </div>
   );
 }

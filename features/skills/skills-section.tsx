@@ -162,10 +162,25 @@ export default function SkillsSection() {
       ref={containerRef}
       style={{
         position: "relative",
-        padding: "160px 0 200px",
+        padding: "120px 0 160px",
         overflow: "hidden",
+        background: "var(--bg)",
       }}
     >
+      {/* Top fade — blends into previous section */}
+      <div
+        aria-hidden="true"
+        style={{
+          position: "absolute",
+          top: 0,
+          left: 0,
+          right: 0,
+          height: "120px",
+          background: "linear-gradient(to bottom, var(--bg), transparent)",
+          pointerEvents: "none",
+          zIndex: 1,
+        }}
+      />
       <div
         aria-hidden="true"
         style={{
