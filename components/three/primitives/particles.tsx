@@ -138,9 +138,9 @@ export default function Particles({
 
   return (
     <>
-      <ParticleLayer count={3000} spread={15} size={0.01} baseOpacity={0.15} progressRef={progressRef} mouse={mouse} speedMultiplier={0.5} />
-      <ParticleLayer count={2000} spread={10} size={0.02} baseOpacity={0.4} progressRef={progressRef} mouse={mouse} speedMultiplier={0.8} />
-      <ParticleLayer count={1000} spread={7} size={0.035} baseOpacity={0.8} progressRef={progressRef} mouse={mouse} speedMultiplier={1.2} />
+      <ParticleLayer count={3600} spread={15} size={0.01} baseOpacity={0.15} progressRef={progressRef} mouse={mouse} speedMultiplier={0.5} />
+      <ParticleLayer count={2400} spread={10} size={0.02} baseOpacity={0.4} progressRef={progressRef} mouse={mouse} speedMultiplier={0.8} />
+      <ParticleLayer count={1200} spread={7} size={0.035} baseOpacity={0.8} progressRef={progressRef} mouse={mouse} speedMultiplier={1.2} />
     </>
   );
 }

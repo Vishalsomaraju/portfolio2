@@ -249,6 +249,7 @@ export default function ProjectsSection() {
       }}
     >
       {/* Top fade — blends into previous section */}
+      {/* Ambient glow */}
       <div
         aria-hidden="true"
         style={{
@@ -262,7 +263,6 @@ export default function ProjectsSection() {
           zIndex: 1,
         }}
       />
-      {/* Ambient glow */}
       <div
         aria-hidden="true"
         style={{

@@ -32,9 +32,6 @@ export default function HeroSection() {
   const glowRef = useRef<HTMLDivElement>(null);
 
   // Parallax layers — different "depths"
-  const eyebrowRef = useRef<HTMLDivElement>(null);
-  const headlineRef = useRef<HTMLDivElement>(null);
-  const subtextRef = useRef<HTMLDivElement>(null);
   const ctaRef = useRef<HTMLDivElement>(null);
 
   // Magnetic buttons
@@ -122,17 +119,8 @@ export default function HeroSection() {
       smooth.y = lerp(smooth.y, mouse.y, 0.055);
 
       // Eyebrow — very shallow depth
-      if (eyebrowRef.current) {
-        eyebrowRef.current.style.transform = `translate(${smooth.x * -10}px, ${smooth.y * -7}px)`;
-      }
       // Headline — deepest depth
-      if (headlineRef.current) {
-        headlineRef.current.style.transform = `translate(${smooth.x * -22}px, ${smooth.y * -15}px)`;
-      }
       // Subtext — medium
-      if (subtextRef.current) {
-        subtextRef.current.style.transform = `translate(${smooth.x * -8}px, ${smooth.y * -5}px)`;
-      }
       // CTA — fixed, no parallax
       if (ctaRef.current) {
         ctaRef.current.style.transform = "translate(0px, 0px)";
@@ -433,18 +421,6 @@ export default function HeroSection() {
           gap: "10px",
         }}
       >
-        <span
-          style={{
-            fontFamily: "var(--font-body)",
-            fontSize: "10px",
-            fontWeight: 500,
-            letterSpacing: "0.2em",
-            textTransform: "uppercase",
-            color: "var(--faint)",
-          }}
-        >
-          Scroll
-        </span>
         <div
           style={{
             width: "1px",
@@ -487,10 +463,7 @@ export default function HeroSection() {
         }}
       >
         {/* Eyebrow — depth layer 1 (shallowest) */}
-        <div
-          ref={eyebrowRef}
-          style={{ willChange: "transform", marginBottom: "32px" }}
-        >
+        <div style={{ marginBottom: "32px" }}>
           <motion.div
             {...fadeUp(0.1)}
             style={{ display: "flex", alignItems: "center", gap: "10px" }}
@@ -537,9 +510,7 @@ export default function HeroSection() {
 
         {/* Headline — depth layer 2 (deepest) */}
         <div
-          ref={headlineRef}
           style={{
-            willChange: "transform",
             fontFamily: "var(--font-display)",
             fontSize: "clamp(3.4rem, 8.5vw, 8.5rem)",
             fontWeight: 760,
@@ -572,7 +543,7 @@ export default function HeroSection() {
         </div>
 
         {/* Subtext — depth layer 3 */}
-        <div ref={subtextRef} style={{ willChange: "transform" }}>
+        <div>
           <motion.p
             {...fadeUp(0.6)}
             style={{
@@ -694,18 +665,6 @@ export default function HeroSection() {
           gap: "10px",
         }}
       >
-        <span
-          style={{
-            fontFamily: "var(--font-body)",
-            fontSize: "9px",
-            fontWeight: 500,
-            letterSpacing: "0.35em",
-            textTransform: "uppercase",
-            color: "var(--faint)",
-          }}
-        >
-          scroll
-        </span>
         <motion.div
           animate={{ y: [0, 9, 0] }}
           transition={{ duration: 1.7, repeat: Infinity, ease: "easeInOut" }}

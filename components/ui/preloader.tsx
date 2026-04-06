@@ -294,8 +294,10 @@ export function Preloader() {
         style={{
           position: "absolute",
           bottom: "clamp(28px, 4vh, 44px)",
-          left: "50%",
-          transform: "translateX(-50%)",
+          left: 0,
+          right: 0,
+          display: "block",
+          textAlign: "center",
           fontFamily: "var(--font-body)",
           fontSize: "10px",
           fontWeight: 500,

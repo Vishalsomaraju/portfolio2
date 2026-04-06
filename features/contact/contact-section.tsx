@@ -65,6 +65,7 @@ export default function ContactSection() {
       }}
     >
       {/* Top fade — blends into previous section */}
+      {/* Ambient glow */}
       <div
         aria-hidden="true"
         style={{
@@ -78,7 +79,6 @@ export default function ContactSection() {
           zIndex: 1,
         }}
       />
-      {/* Ambient glow */}
       <div
         aria-hidden="true"
         style={{

@@ -102,7 +102,6 @@ export default function AboutSection() {
           zIndex: 1,
         }}
       />
-
       <div style={{ maxWidth: "1200px", margin: "0 auto", padding: "0 40px" }}>
         {/* Chapter label */}
         <motion.div
