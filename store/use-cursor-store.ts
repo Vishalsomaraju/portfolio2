@@ -1,3 +1,8 @@
+// ─────────────────────────────────────────────────────────────────────────────
+// FILE: store/use-cursor-store.ts
+// PURPOSE: Cursor state — "screwdriver" added for Stage 3 hardware interaction
+// ─────────────────────────────────────────────────────────────────────────────
+
 import { create } from "zustand";
 
 export type CursorType =
@@ -6,7 +11,8 @@ export type CursorType =
   | "project"
   | "cta"
   | "drag"
-  | "text";
+  | "text"
+  | "screwdriver"; // added for /experience Stage 3
 
 interface CursorState {
   type: CursorType;

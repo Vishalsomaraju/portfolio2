@@ -251,132 +251,121 @@ export default function SkillsSection() {
         </div>
       </div>
 
-      <style dangerouslySetInnerHTML={{ __html: \`
-        .constellation-wall {
-          display: flex;
-          flex-wrap: wrap;
-          gap: 20px;
-          justify-content: center;
-          align-items: center;
-          padding: 40px 0;
-          perspective: 1200px;
-        }
-
-        .boxed-tile {
-          position: relative;
-          width: 140px;
-          height: 140px;
-          border-radius: 20px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          background: #080a0e;
-          border: 1px solid rgba(255, 255, 255, 0.05);
-          backdrop-filter: blur(16px);
-          box-shadow:
-            inset 0 1px 0 rgba(255, 255, 255, 0.04),
-            0 24px 48px rgba(0, 0, 0, 0.4);
-          transform-style: preserve-3d;
-          transition: border-color 0.4s ease, box-shadow 0.4s ease;
-        }
-
-        .boxed-tile::before {
-          content: "";
-          position: absolute;
-          inset: -2px;
-          border-radius: 22px;
-          background: var(--skill-accent);
-          opacity: 0;
-          filter: blur(28px);
-          z-index: -1;
-          transition: opacity 0.4s ease;
-        }
-
-        .boxed-tile::after {
-          content: "";
-          position: absolute;
-          inset: 0;
-          border-radius: 20px;
-          background: linear-gradient(135deg, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0) 60%);
-          pointer-events: none;
-        }
-
-        .boxed-tile:hover {
-          border-color: rgba(255, 255, 255, 0.12);
-        }
-
-        .boxed-tile:hover::before {
-          opacity: 0.18;
-        }
-
-        .skill-icon-wrap {
-          width: 55%;
-          height: 55%;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          z-index: 1;
-        }
-
-        .skill-icon-svg {
-          width: 100%;
-          height: 100%;
-          display: block;
-          filter: drop-shadow(0 6px 12px rgba(0,0,0,0.3));
-        }
-
-        /* Light Mode Rules */
-        .light .boxed-tile {
-          background: #dbcfb9;
-          border: 1px solid rgba(70, 53, 34, 0.1);
-          box-shadow:
-            inset 0 1px 0 rgba(255, 255, 255, 0.6),
-            0 24px 48px rgba(76, 58, 37, 0.15);
-        }
-
-        .light .boxed-tile::after {
-          background: linear-gradient(135deg, rgba(255, 255, 255, 0.4) 0%, rgba(255, 255, 255, 0) 60%);
-        }
-
-        .light .boxed-tile:hover {
-          border-color: rgba(70, 53, 34, 0.2);
-        }
-        
-        .light .boxed-tile:hover::before {
-          opacity: 0.12;
-        }
-
-        .light .skill-icon-svg.dark-invert {
-          color: #211c13;
-        }
-
-        .dark-invert {
-          color: #f7eedb;
-        }
-
-        /* Responsive Layout Overrides */
-        @media (max-width: 900px) {
-          .constellation-wall {
-            gap: 16px;
-          }
-          .boxed-tile {
-            width: 110px;
-            height: 110px;
-            border-radius: 16px;
-          }
-        }
-
-        @media (max-width: 600px) {
-          .constellation-wall {
-            gap: 12px;
-          }
-          .boxed-tile {
-            width: 90px;
-            height: 90px;
-            border-radius: 14px;
-          }
-        }
-      \` }} />
+      {/* Styles injected via const to avoid template literal escaping issues */}
+      <style dangerouslySetInnerHTML={{ __html: SKILLS_CSS }} />
     </section>
   );
 }
+
+const SKILLS_CSS = `
+  .constellation-wall {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    justify-content: center;
+    align-items: center;
+    padding: 40px 0;
+    perspective: 1200px;
+  }
+
+  .boxed-tile {
+    position: relative;
+    width: 140px;
+    height: 140px;
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #080a0e;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(16px);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.04),
+      0 24px 48px rgba(0, 0, 0, 0.4);
+    transform-style: preserve-3d;
+    transition: border-color 0.4s ease, box-shadow 0.4s ease;
+  }
+
+  .boxed-tile::before {
+    content: "";
+    position: absolute;
+    inset: -2px;
+    border-radius: 22px;
+    background: var(--skill-accent);
+    opacity: 0;
+    filter: blur(28px);
+    z-index: -1;
+    transition: opacity 0.4s ease;
+  }
+
+  .boxed-tile::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: 20px;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0) 60%);
+    pointer-events: none;
+  }
+
+  .boxed-tile:hover {
+    border-color: rgba(255, 255, 255, 0.12);
+  }
+
+  .boxed-tile:hover::before {
+    opacity: 0.18;
+  }
+
+  .skill-icon-wrap {
+    width: 55%;
+    height: 55%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1;
+  }
+
+  .skill-icon-svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+    filter: drop-shadow(0 6px 12px rgba(0,0,0,0.3));
+  }
+
+  .light .boxed-tile {
+    background: #dbcfb9;
+    border: 1px solid rgba(70, 53, 34, 0.1);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.6),
+      0 24px 48px rgba(76, 58, 37, 0.15);
+  }
+
+  .light .boxed-tile::after {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.4) 0%, rgba(255, 255, 255, 0) 60%);
+  }
+
+  .light .boxed-tile:hover {
+    border-color: rgba(70, 53, 34, 0.2);
+  }
+
+  .light .boxed-tile:hover::before {
+    opacity: 0.12;
+  }
+
+  .light .skill-icon-svg.dark-invert {
+    color: #211c13;
+  }
+
+  .dark-invert {
+    color: #f7eedb;
+  }
+
+  @media (max-width: 900px) {
+    .constellation-wall { gap: 16px; }
+    .boxed-tile { width: 110px; height: 110px; border-radius: 16px; }
+  }
+
+  @media (max-width: 600px) {
+    .constellation-wall { gap: 12px; }
+    .boxed-tile { width: 90px; height: 90px; border-radius: 14px; }
+  }
+`;

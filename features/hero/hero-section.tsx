@@ -644,6 +644,38 @@ export default function HeroSection() {
             >
               Get in touch
             </a>
+
+            {/* ── Experience CTA — navigate to /experience ── */}
+            <a
+              href="/experience"
+              onMouseEnter={() => setType("cta")}
+              onMouseLeave={() => setType("default")}
+              style={{
+                fontFamily:     "var(--font-body)",
+                fontSize:       "13px",
+                fontWeight:     600,
+                letterSpacing:  "0.06em",
+                color:          "var(--accent)",
+                background:     "transparent",
+                border:         "1px solid var(--accent)",
+                borderRadius:   "99px",
+                padding:        "14px 32px",
+                textDecoration: "none",
+                display:        "inline-block",
+                willChange:     "transform",
+                transition:     "background 0.25s, color 0.25s",
+              }}
+              onMouseOver={(e) => {
+                (e.currentTarget as HTMLAnchorElement).style.background = "var(--accent)";
+                (e.currentTarget as HTMLAnchorElement).style.color      = "#fff";
+              }}
+              onMouseOut={(e) => {
+                (e.currentTarget as HTMLAnchorElement).style.background = "transparent";
+                (e.currentTarget as HTMLAnchorElement).style.color      = "var(--accent)";
+              }}
+            >
+              Enter Experience →
+            </a>
           </motion.div>
         </div>
       </div>
