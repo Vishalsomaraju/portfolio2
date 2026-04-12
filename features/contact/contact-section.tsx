@@ -1,571 +1,410 @@
 "use client";
 
-import { useState } from "react";
-import { motion } from "framer-motion";
+// ─── features/contact/contact-section.tsx ────────────────────────────────────
+// Contact section. Left: heading + social links + live IST clock.
+// Right: form with client-side validation and success state.
 
-const socials = [
-  { label: "GitHub", href: "https://github.com/Vishalsomaraju" },
-  { label: "LinkedIn", href: "#" },
-  { label: "Twitter", href: "#" },
+import { useEffect, useState, useRef } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+
+const SOCIALS = [
+  { label: "GitHub",   href: "https://github.com/Vishalsomaraju",          icon: "GH" },
+  { label: "LinkedIn", href: "https://linkedin.com/in/vishal-somaraju",     icon: "LI" },
+  { label: "Twitter",  href: "https://twitter.com/vishalsomaraju",          icon: "TW" },
 ];
 
-export default function ContactSection() {
-  const [formState, setFormState] = useState({
-    name: "",
-    email: "",
-    message: "",
-  });
-  const [sending, setSending] = useState(false);
-  const [sent, setSent] = useState(false);
+// ── Live IST Clock ─────────────────────────────────────────────────────────────
+function ISTClock() {
+  const [time, setTime] = useState("");
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setSending(true);
-    await new Promise((r) => setTimeout(r, 1400));
-    setSending(false);
-    setSent(true);
-  };
+  useEffect(() => {
+    const update = () => {
+      const now = new Date();
+      setTime(
+        now.toLocaleTimeString("en-IN", {
+          timeZone: "Asia/Kolkata",
+          hour: "2-digit",
+          minute: "2-digit",
+          second: "2-digit",
+          hour12: false,
+        })
+      );
+    };
+    update();
+    const id = setInterval(update, 1000);
+    return () => clearInterval(id);
+  }, []);
 
-  const fieldStyle: React.CSSProperties = {
-    fontFamily: "var(--font-body)",
-    fontSize: "15px",
-    color: "var(--text)",
-    background: "var(--input-bg)",
-    border: "1px solid var(--input-border)",
-    borderRadius: "10px",
-    padding: "14px 18px",
-    outline: "none",
+  return (
+    <div
+      style={{
+        display: "flex",
+        alignItems: "center",
+        gap: 10,
+        padding: "8px 14px",
+        borderRadius: 8,
+        backgroundColor: "rgba(255,255,255,0.04)",
+        border: "1px solid rgba(255,255,255,0.07)",
+        width: "fit-content",
+      }}
+    >
+      <span
+        style={{
+          width: 6, height: 6, borderRadius: "50%",
+          backgroundColor: "#4ADE80",
+          boxShadow: "0 0 6px rgba(74,222,128,0.7)",
+          display: "inline-block",
+          animation: "clockPulse 1s ease-in-out infinite",
+        }}
+      />
+      <span
+        style={{
+          fontSize: "0.78rem",
+          color: "rgba(255,255,255,0.35)",
+          fontFamily: "var(--font-geist-mono)",
+          letterSpacing: "0.1em",
+        }}
+      >
+        {time} IST · Hyderabad
+      </span>
+    </div>
+  );
+}
+
+// ── Form field ────────────────────────────────────────────────────────────────
+function Field({
+  label, name, type = "text", multiline = false, required = true,
+}: {
+  label: string; name: string; type?: string;
+  multiline?: boolean; required?: boolean;
+}) {
+  const [focused, setFocused] = useState(false);
+
+  const base: React.CSSProperties = {
     width: "100%",
-    transition: "border-color 0.25s, background 0.25s, box-shadow 0.25s",
+    padding: "14px 16px",
+    background: "rgba(255,255,255,0.04)",
+    border: `1px solid ${focused ? "rgba(224,122,95,0.5)" : "rgba(255,255,255,0.08)"}`,
+    borderRadius: 10,
+    color: "#F3F1EC",
+    fontSize: "0.88rem",
+    outline: "none",
+    fontFamily: "var(--font-geist-sans)",
+    cursor: "none",
+    transition: "border-color 0.2s ease, background 0.2s ease",
+    backgroundColor: focused ? "rgba(255,255,255,0.06)" : "rgba(255,255,255,0.04)",
   };
 
-  const handleFocus = (
-    e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>,
-  ) => {
-    e.target.style.borderColor = "var(--accent)";
-    e.target.style.background = "var(--input-bg-focus)";
-    e.target.style.boxShadow = "0 0 0 3px var(--accent-glow)";
-  };
-  const handleBlur = (
-    e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>,
-  ) => {
-    e.target.style.borderColor = "var(--input-border)";
-    e.target.style.background = "var(--input-bg)";
-    e.target.style.boxShadow = "none";
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 7 }}>
+      <label
+        style={{
+          fontSize: "0.72rem",
+          color: "rgba(255,255,255,0.35)",
+          letterSpacing: "0.08em",
+          textTransform: "uppercase",
+        }}
+      >
+        {label}
+      </label>
+      {multiline ? (
+        <textarea
+          name={name}
+          rows={5}
+          required={required}
+          onFocus={() => setFocused(true)}
+          onBlur={() => setFocused(false)}
+          style={{ ...base, resize: "none" }}
+        />
+      ) : (
+        <input
+          name={name}
+          type={type}
+          required={required}
+          onFocus={() => setFocused(true)}
+          onBlur={() => setFocused(false)}
+          style={base}
+        />
+      )}
+    </div>
+  );
+}
+
+// ── Main section ──────────────────────────────────────────────────────────────
+type FormState = "idle" | "sending" | "success" | "error";
+
+export default function ContactSection() {
+  const [state, setState] = useState<FormState>("idle");
+  const formRef = useRef<HTMLFormElement>(null);
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setState("sending");
+    const data = Object.fromEntries(new FormData(e.currentTarget));
+
+    try {
+      const res = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+      setState(res.ok ? "success" : "error");
+    } catch {
+      setState("error");
+    }
   };
 
   return (
     <section
       id="contact"
       style={{
-        position: "relative",
-        padding: "120px 0 0",
-        overflow: "hidden",
-        background: "var(--bg)",
+        backgroundColor: "#0a0a0a",
+        paddingTop: 120,
+        paddingBottom: 120,
+        borderTop: "1px solid rgba(255,255,255,0.05)",
       }}
     >
-      {/* Top fade — blends into previous section */}
-      {/* Ambient glow */}
       <div
-        aria-hidden="true"
         style={{
-          position: "absolute",
-          top: 0,
-          left: 0,
-          right: 0,
-          height: "120px",
-          background: "linear-gradient(to bottom, var(--bg), transparent)",
-          pointerEvents: "none",
-          zIndex: 1,
+          maxWidth: 1200,
+          margin: "0 auto",
+          padding: "0 48px",
+          display: "grid",
+          gridTemplateColumns: "1fr 1.2fr",
+          gap: 100,
+          alignItems: "start",
         }}
-      />
-      <div
-        aria-hidden="true"
-        style={{
-          position: "absolute",
-          top: "20%",
-          left: "50%",
-          transform: "translateX(-50%)",
-          width: "700px",
-          height: "500px",
-          background:
-            "radial-gradient(ellipse, var(--hero-glow) 0%, transparent 65%)",
-          pointerEvents: "none",
-        }}
-      />
-
-      <div style={{ maxWidth: "1200px", margin: "0 auto", padding: "0 40px" }}>
-        {/* Chapter label */}
+        className="grid-cols-1 lg:grid-cols-[1fr_1.2fr]"
+      >
+        {/* ── Left col ── */}
         <motion.div
-          initial={{ opacity: 0, x: -20 }}
-          whileInView={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-          viewport={{ once: true, margin: "-80px" }}
-          className="chapter-label"
-          style={{ marginBottom: "48px" }}
-        >
-          04 — Contact
-        </motion.div>
-
-        {/* Big CTA heading */}
-        <motion.div
-          initial={{ opacity: 0, y: 50 }}
+          initial={{ opacity: 0, y: 24 }}
           whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
-          viewport={{ once: true, margin: "-60px" }}
-          style={{ marginBottom: "80px" }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.7 }}
         >
+          <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 20 }}>
+            <motion.div
+              initial={{ scaleX: 0 }}
+              whileInView={{ scaleX: 1 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.7 }}
+              style={{ height: 1, width: 40, backgroundColor: "#E07A5F", transformOrigin: "left" }}
+            />
+            <span style={{
+              fontSize: "0.68rem", letterSpacing: "0.28em",
+              color: "#E07A5F", textTransform: "uppercase",
+              fontFamily: "var(--font-geist-mono)",
+            }}>
+              04 / Contact
+            </span>
+          </div>
+
           <h2
             style={{
-              fontFamily: "var(--font-display)",
-              fontSize: "clamp(3.5rem, 9vw, 9rem)",
-              fontWeight: 800,
-              lineHeight: 0.92,
-              letterSpacing: "-0.04em",
-              color: "var(--text)",
-              marginBottom: "32px",
+              fontSize: "clamp(2.2rem, 4vw, 3.2rem)",
+              fontWeight: 700,
+              color: "#F3F1EC",
+              letterSpacing: "-0.025em",
+              lineHeight: 1.1,
+              marginBottom: 20,
             }}
           >
-            Let's build
-            <br />
-            <span
-              style={{
-                WebkitTextStroke: "2px var(--accent)",
-                color: "transparent",
-              }}
-            >
-              something.
-            </span>
+            Let&apos;s build<br />something.
           </h2>
 
           <p
             style={{
-              fontFamily: "var(--font-body)",
-              fontSize: "clamp(1rem, 1.5vw, 1.1rem)",
-              color: "var(--muted)",
-              maxWidth: "480px",
-              lineHeight: 1.75,
+              fontSize: "0.9rem",
+              color: "rgba(255,255,255,0.4)",
+              lineHeight: 1.8,
+              marginBottom: 40,
+              maxWidth: 340,
             }}
           >
-            Available for freelance projects, full-time roles, and interesting
-            collaborations. If you have a vision, let's make it real.
+            Open to freelance projects, full-time roles, and interesting
+            collaborations. If you have an idea, let&apos;s talk.
           </p>
-        </motion.div>
 
-        {/* Two column: form + info */}
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "1fr 1fr",
-            gap: "80px",
-            paddingBottom: "80px",
-          }}
-          className="contact-grid"
-        >
-          {/* ── Form ────────────────────────────────── */}
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-            viewport={{ once: true, margin: "-60px" }}
-          >
-            {sent ? (
-              <div
-                style={{
-                  padding: "48px 40px",
-                  border: "1px solid var(--accent-border)",
-                  borderRadius: "16px",
-                  background: "var(--accent-subtle)",
-                  textAlign: "center",
-                }}
-              >
-                <div
-                  style={{
-                    fontFamily: "var(--font-display)",
-                    fontSize: "2.5rem",
-                    marginBottom: "12px",
-                  }}
-                >
-                  ✦
-                </div>
-                <p
-                  style={{
-                    fontFamily: "var(--font-display)",
-                    fontSize: "1.4rem",
-                    fontWeight: 600,
-                    color: "var(--text)",
-                    marginBottom: "8px",
-                  }}
-                >
-                  Message sent!
-                </p>
-                <p
-                  style={{
-                    fontFamily: "var(--font-body)",
-                    fontSize: "14px",
-                    color: "var(--muted)",
-                  }}
-                >
-                  I'll get back to you within 24 hours.
-                </p>
-              </div>
-            ) : (
-              <form
-                onSubmit={handleSubmit}
+          {/* IST clock */}
+          <div style={{ marginBottom: 40 }}>
+            <ISTClock />
+          </div>
+
+          {/* Socials */}
+          <div style={{ display: "flex", gap: 12 }}>
+            {SOCIALS.map((s) => (
+              <a
+                key={s.label}
+                href={s.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                data-cursor="hover"
                 style={{
                   display: "flex",
-                  flexDirection: "column",
-                  gap: "20px",
-                }}
-              >
-                {[
-                  {
-                    id: "name",
-                    label: "Name",
-                    type: "text",
-                    placeholder: "Your name",
-                  },
-                  {
-                    id: "email",
-                    label: "Email",
-                    type: "email",
-                    placeholder: "your@email.com",
-                  },
-                ].map((field) => (
-                  <div
-                    key={field.id}
-                    style={{
-                      display: "flex",
-                      flexDirection: "column",
-                      gap: "8px",
-                    }}
-                  >
-                    <label
-                      htmlFor={field.id}
-                      style={{
-                        fontFamily: "var(--font-body)",
-                        fontSize: "11px",
-                        fontWeight: 600,
-                        letterSpacing: "0.15em",
-                        textTransform: "uppercase",
-                        color: "var(--label)",
-                      }}
-                    >
-                      {field.label}
-                    </label>
-                    <input
-                      id={field.id}
-                      type={field.type}
-                      placeholder={field.placeholder}
-                      value={formState[field.id as keyof typeof formState]}
-                      onChange={(e) =>
-                        setFormState({
-                          ...formState,
-                          [field.id]: e.target.value,
-                        })
-                      }
-                      required
-                      style={fieldStyle}
-                      onFocus={handleFocus}
-                      onBlur={handleBlur}
-                    />
-                  </div>
-                ))}
-
-                <div
-                  style={{
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: "8px",
-                  }}
-                >
-                  <label
-                    htmlFor="message"
-                    style={{
-                      fontFamily: "var(--font-body)",
-                      fontSize: "11px",
-                      fontWeight: 600,
-                      letterSpacing: "0.15em",
-                      textTransform: "uppercase",
-                      color: "var(--label)",
-                    }}
-                  >
-                    Message
-                  </label>
-                  <textarea
-                    id="message"
-                    placeholder="Tell me about your project..."
-                    value={formState.message}
-                    onChange={(e) =>
-                      setFormState({ ...formState, message: e.target.value })
-                    }
-                    required
-                    rows={5}
-                    style={{ ...fieldStyle, resize: "vertical" }}
-                    onFocus={
-                      handleFocus as unknown as React.FocusEventHandler<HTMLTextAreaElement>
-                    }
-                    onBlur={
-                      handleBlur as unknown as React.FocusEventHandler<HTMLTextAreaElement>
-                    }
-                  />
-                </div>
-
-                <button
-                  type="submit"
-                  disabled={sending}
-                  style={{
-                    fontFamily: "var(--font-body)",
-                    fontSize: "14px",
-                    fontWeight: 600,
-                    letterSpacing: "0.05em",
-                    color: "white",
-                    background: sending
-                      ? "rgba(224,122,95,0.6)"
-                      : "var(--accent)",
-                    border: "1px solid var(--accent)",
-                    borderRadius: "10px",
-                    padding: "16px 32px",
-                    cursor: "pointer",
-                    transition:
-                      "transform 0.2s, box-shadow 0.2s, background 0.25s",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    gap: "8px",
-                  }}
-                  onMouseOver={(e) => {
-                    if (!sending) {
-                      (e.currentTarget as HTMLButtonElement).style.transform =
-                        "translateY(-2px)";
-                      (e.currentTarget as HTMLButtonElement).style.boxShadow =
-                        "0 8px 30px var(--accent-glow)";
-                    }
-                  }}
-                  onMouseOut={(e) => {
-                    (e.currentTarget as HTMLButtonElement).style.transform =
-                      "translateY(0)";
-                    (e.currentTarget as HTMLButtonElement).style.boxShadow =
-                      "none";
-                  }}
-                >
-                  {sending ? (
-                    <>
-                      <span
-                        style={{
-                          width: "14px",
-                          height: "14px",
-                          border: "2px solid rgba(255,255,255,0.3)",
-                          borderTop: "2px solid white",
-                          borderRadius: "50%",
-                          animation: "spin 0.6s linear infinite",
-                        }}
-                      />
-                      Sending...
-                    </>
-                  ) : (
-                    "Send message →"
-                  )}
-                </button>
-              </form>
-            )}
-          </motion.div>
-
-          {/* ── Info column ──────────────────────────── */}
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.15, ease: [0.16, 1, 0.3, 1] }}
-            viewport={{ once: true, margin: "-60px" }}
-            style={{ paddingTop: "8px" }}
-          >
-            {/* Email */}
-            <div style={{ marginBottom: "48px" }}>
-              <div
-                style={{
-                  fontFamily: "var(--font-body)",
-                  fontSize: "11px",
-                  fontWeight: 600,
-                  letterSpacing: "0.2em",
-                  textTransform: "uppercase",
-                  color: "var(--label)",
-                  marginBottom: "14px",
-                }}
-              >
-                Email
-              </div>
-              <a
-                href="mailto:vishal@example.com"
-                style={{
-                  fontFamily: "var(--font-display)",
-                  fontSize: "clamp(1.2rem, 2vw, 1.8rem)",
-                  fontWeight: 600,
-                  color: "var(--text)",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  width: 44,
+                  height: 44,
+                  borderRadius: 12,
+                  border: "1px solid rgba(255,255,255,0.1)",
+                  color: "rgba(255,255,255,0.45)",
                   textDecoration: "none",
-                  letterSpacing: "-0.02em",
-                  transition: "color 0.25s",
+                  fontSize: "0.65rem",
+                  fontFamily: "var(--font-geist-mono)",
+                  fontWeight: 600,
+                  letterSpacing: "0.04em",
+                  transition: "all 0.2s ease",
                 }}
                 onMouseOver={(e) => {
-                  (e.currentTarget as HTMLAnchorElement).style.color =
-                    "var(--accent)";
+                  const el = e.currentTarget as HTMLAnchorElement;
+                  el.style.borderColor = "rgba(224,122,95,0.4)";
+                  el.style.color = "#E07A5F";
                 }}
                 onMouseOut={(e) => {
-                  (e.currentTarget as HTMLAnchorElement).style.color =
-                    "var(--text)";
+                  const el = e.currentTarget as HTMLAnchorElement;
+                  el.style.borderColor = "rgba(255,255,255,0.1)";
+                  el.style.color = "rgba(255,255,255,0.45)";
                 }}
               >
-                vishalsomaraju9@gmail.com
+                {s.icon}
               </a>
-            </div>
+            ))}
+          </div>
+        </motion.div>
 
-            {/* Based in */}
-            <div style={{ marginBottom: "48px" }}>
-              <div
-                style={{
-                  fontFamily: "var(--font-body)",
-                  fontSize: "11px",
-                  fontWeight: 600,
-                  letterSpacing: "0.2em",
-                  textTransform: "uppercase",
-                  color: "var(--label)",
-                  marginBottom: "14px",
-                }}
-              >
-                Based in
-              </div>
-              <p
-                style={{
-                  fontFamily: "var(--font-display)",
-                  fontSize: "1.4rem",
-                  fontWeight: 600,
-                  color: "var(--text)",
-                  letterSpacing: "-0.02em",
-                }}
-              >
-                Hyderabad, India
-                <br />
-                <span
+        {/* ── Right col: Form ── */}
+        <motion.div
+          initial={{ opacity: 0, y: 32 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ delay: 0.15, duration: 0.7 }}
+        >
+          <div
+            style={{
+              backgroundColor: "#0F1115",
+              border: "1px solid rgba(255,255,255,0.07)",
+              borderRadius: 20,
+              padding: "44px",
+            }}
+          >
+            <AnimatePresence mode="wait">
+              {state === "success" ? (
+                <motion.div
+                  key="success"
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
                   style={{
-                    fontSize: "1rem",
-                    color: "var(--muted)",
-                    fontWeight: 400,
+                    textAlign: "center",
+                    padding: "48px 0",
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    gap: 16,
                   }}
                 >
-                  Available remotely worldwide
-                </span>
-              </p>
-            </div>
-
-            {/* Socials */}
-            <div>
-              <div
-                style={{
-                  fontFamily: "var(--font-body)",
-                  fontSize: "11px",
-                  fontWeight: 600,
-                  letterSpacing: "0.2em",
-                  textTransform: "uppercase",
-                  color: "var(--label)",
-                  marginBottom: "20px",
-                }}
-              >
-                Find me on
-              </div>
-              <div
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: "12px",
-                }}
-              >
-                {socials.map((s) => (
-                  <a
-                    key={s.label}
-                    href={s.href}
-                    target="_blank"
-                    rel="noopener noreferrer"
+                  <div
                     style={{
-                      fontFamily: "var(--font-body)",
-                      fontSize: "15px",
-                      fontWeight: 500,
-                      color: "var(--muted)",
-                      textDecoration: "none",
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "10px",
-                      transition: "color 0.25s",
-                      width: "fit-content",
-                    }}
-                    onMouseOver={(e) => {
-                      (e.currentTarget as HTMLAnchorElement).style.color =
-                        "var(--text)";
-                    }}
-                    onMouseOut={(e) => {
-                      (e.currentTarget as HTMLAnchorElement).style.color =
-                        "var(--muted)";
+                      width: 56, height: 56,
+                      borderRadius: "50%",
+                      backgroundColor: "rgba(74,222,128,0.1)",
+                      border: "1px solid rgba(74,222,128,0.3)",
+                      display: "flex", alignItems: "center", justifyContent: "center",
+                      fontSize: "1.4rem",
                     }}
                   >
-                    {s.label}
-                    <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
-                      <path
-                        d="M1 9L9 1M9 1H3M9 1V7"
-                        stroke="currentColor"
-                        strokeWidth="1.5"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                    </svg>
-                  </a>
-                ))}
-              </div>
-            </div>
-          </motion.div>
-        </div>
+                    ✓
+                  </div>
+                  <h3 style={{ fontSize: "1.1rem", fontWeight: 600, color: "#F3F1EC" }}>
+                    Message sent.
+                  </h3>
+                  <p style={{ fontSize: "0.85rem", color: "rgba(255,255,255,0.38)" }}>
+                    I&apos;ll get back to you within 24 hours.
+                  </p>
+                </motion.div>
+              ) : (
+                <motion.form
+                  key="form"
+                  ref={formRef}
+                  onSubmit={handleSubmit}
+                  style={{ display: "flex", flexDirection: "column", gap: 22 }}
+                >
+                  <div
+                    style={{
+                      display: "grid",
+                      gridTemplateColumns: "1fr 1fr",
+                      gap: 16,
+                    }}
+                  >
+                    <Field label="Name"  name="name"  />
+                    <Field label="Email" name="email" type="email" />
+                  </div>
+                  <Field label="Subject"  name="subject"  required={false} />
+                  <Field label="Message"  name="message"  multiline />
+
+                  {state === "error" && (
+                    <p style={{ fontSize: "0.78rem", color: "#F87171" }}>
+                      Something went wrong. Please try again or email directly.
+                    </p>
+                  )}
+
+                  <motion.button
+                    type="submit"
+                    disabled={state === "sending"}
+                    whileHover={{ scale: 1.01 }}
+                    whileTap={{ scale: 0.98 }}
+                    style={{
+                      padding: "14px 28px",
+                      borderRadius: 10,
+                      border: "1px solid #E07A5F",
+                      backgroundColor:
+                        state === "sending"
+                          ? "rgba(224,122,95,0.2)"
+                          : "rgba(224,122,95,0.1)",
+                      color: "#E07A5F",
+                      fontSize: "0.88rem",
+                      fontWeight: 600,
+                      cursor: state === "sending" ? "wait" : "none",
+                      letterSpacing: "0.05em",
+                      transition: "all 0.2s ease",
+                      alignSelf: "flex-start",
+                    }}
+                  >
+                    {state === "sending" ? "Sending…" : "Send Message →"}
+                  </motion.button>
+                </motion.form>
+              )}
+            </AnimatePresence>
+          </div>
+        </motion.div>
       </div>
 
-      {/* Footer bar */}
+      {/* Footer */}
       <div
         style={{
-          borderTop: "1px solid var(--border)",
-          padding: "24px 40px",
+          maxWidth: 1200,
+          margin: "80px auto 0",
+          padding: "24px 48px 0",
+          borderTop: "1px solid rgba(255,255,255,0.05)",
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
-          maxWidth: "100%",
           flexWrap: "wrap",
-          gap: "12px",
+          gap: 12,
         }}
       >
-        <span
-          style={{
-            fontFamily: "var(--font-body)",
-            fontSize: "12px",
-            color: "var(--faint)",
-          }}
-        >
-          © 2025 Vishal Somaraju. Crafted with intention.
+        <span style={{ fontSize: "0.75rem", color: "rgba(255,255,255,0.2)" }}>
+          © {new Date().getFullYear()} Vishal Somaraju. All rights reserved.
         </span>
-        <span
-          style={{
-            fontFamily: "var(--font-body)",
-            fontSize: "12px",
-            color: "var(--faint)",
-          }}
-        >
-          Next.js · R3F · GSAP · Framer
+        <span style={{ fontSize: "0.75rem", color: "rgba(255,255,255,0.15)", fontFamily: "var(--font-geist-mono)" }}>
+          Built with Next.js · GSAP · Three.js
         </span>
       </div>
 
       <style>{`
-        @keyframes spin { to { transform: rotate(360deg); } }
-        @media (max-width: 768px) {
-          .contact-grid { grid-template-columns: 1fr !important; }
-        }
-        /* Respect theme transition on inputs */
-        input, textarea {
-          transition: background var(--theme-transition) ease,
-                      border-color var(--theme-transition) ease,
-                      color var(--theme-transition) ease;
+        @keyframes clockPulse {
+          0%, 100% { opacity: 1; }
+          50% { opacity: 0.4; }
         }
       `}</style>
     </section>

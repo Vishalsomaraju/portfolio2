@@ -1,200 +1,174 @@
 "use client";
 
-import { useRef, useEffect } from "react";
-import { motion } from "framer-motion";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
+// ─── features/projects/projects-section.tsx ───────────────────────────────────
+// Projects section. Cards with 3D mouse-tracking tilt, accent on hover,
+// staggered scroll reveal.
 
-const projects = [
+import { useRef, useState } from "react";
+import { motion } from "framer-motion";
+
+// ── Project data ──────────────────────────────────────────────────────────────
+const PROJECTS = [
   {
-    num: "01",
-    title: "E-Commerce Platform",
-    desc: "Full-stack commerce solution with real-time inventory, 3D product viewer, and payment integration. Built for scale.",
-    tags: ["Next.js", "TypeScript", "PostgreSQL", "Three.js"],
-    year: "2024",
-    link: "#",
+    id: "p1",
+    index: "01",
+    title: "Portfolio — Main Site",
+    description:
+      "Premium 3D portfolio with scroll-driven particle systems, GSAP timelines, and cinematic section transitions built on React Three Fiber.",
+    stack: ["Next.js 14", "React Three Fiber", "GSAP", "Framer Motion", "Zustand"],
+    liveUrl: "#",
+    repoUrl: "https://github.com/Vishalsomaraju/portfolio2",
+    featured: true,
     accent: "#E07A5F",
   },
   {
-    num: "02",
-    title: "AI Analytics Dashboard",
-    desc: "Real-time data pipeline with ML-powered insights. Custom visualization engine handling 10K+ events/second.",
-    tags: ["React", "Python", "Redis", "WebSockets"],
-    year: "2024",
-    link: "#",
-    accent: "#7B9FE0",
+    id: "p2",
+    index: "02",
+    title: "Project Apex",
+    description:
+      "Full-stack SaaS platform with real-time collaboration, JWT auth, role-based access control, and a PostgreSQL-backed REST API.",
+    stack: ["Next.js", "Node.js", "PostgreSQL", "Redis", "Docker"],
+    liveUrl: "#",
+    repoUrl: "#",
+    featured: true,
+    accent: "#6B8CE8",
   },
   {
-    num: "03",
-    title: "3D Portfolio Engine",
-    desc: "This portfolio — built from scratch with WebGL particle systems, scroll-driven 3D scenes, and custom cursor logic.",
-    tags: ["R3F", "GSAP", "Three.js", "Lenis"],
-    year: "2025",
-    link: "#",
-    accent: "#8FD4A8",
+    id: "p3",
+    index: "03",
+    title: "Project Orbit",
+    description:
+      "WebSocket-powered analytics dashboard with sub-100ms live updates, D3.js visualizations, and granular filter controls.",
+    stack: ["React", "WebSockets", "Express", "D3.js", "TypeScript"],
+    liveUrl: "#",
+    repoUrl: "#",
+    featured: false,
+    accent: "#B87333",
   },
   {
-    num: "04",
-    title: "SaaS Productivity Tool",
-    desc: "B2B workflow automation platform with drag-and-drop builder, webhook integrations, and team collaboration.",
-    tags: ["Next.js", "Node.js", "Prisma", "Tailwind"],
-    year: "2024",
-    link: "#",
-    accent: "#D4A857",
+    id: "p4",
+    index: "04",
+    title: "Project Echo",
+    description:
+      "Mobile-first PWA with offline support, background sync, push notifications, and a GraphQL data layer backed by MongoDB.",
+    stack: ["React", "GraphQL", "MongoDB", "PWA", "Workbox"],
+    liveUrl: "#",
+    repoUrl: "#",
+    featured: false,
+    accent: "#4ADE80",
   },
 ];
 
+// ── 3D tilt card ──────────────────────────────────────────────────────────────
 function ProjectCard({
   project,
   index,
 }: {
-  project: (typeof projects)[0];
+  project: (typeof PROJECTS)[0];
   index: number;
 }) {
   const cardRef = useRef<HTMLDivElement>(null);
-  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    const card = cardRef.current;
-    if (!card) return;
-    const rect = card.getBoundingClientRect();
-    const x = (e.clientX - rect.left) / rect.width - 0.5;
-    const y = (e.clientY - rect.top) / rect.height - 0.5;
-    card.style.transform = `perspective(1200px) rotateY(${x * 8}deg) rotateX(${-y * 8}deg) translateZ(10px)`;
+  const [tilt, setTilt] = useState({ x: 0, y: 0 });
+  const [hovered, setHovered] = useState(false);
+
+  const onMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    const rect = cardRef.current!.getBoundingClientRect();
+    const cx = rect.left + rect.width / 2;
+    const cy = rect.top + rect.height / 2;
+    const dx = (e.clientX - cx) / (rect.width / 2);
+    const dy = (e.clientY - cy) / (rect.height / 2);
+    setTilt({ x: dy * -6, y: dx * 6 });
   };
 
-  const handleMouseLeave = () => {
-    if (cardRef.current) {
-      cardRef.current.style.transform =
-        "perspective(1200px) rotateY(0deg) rotateX(0deg) translateZ(0px)";
-    }
+  const onMouseLeave = () => {
+    setTilt({ x: 0, y: 0 });
+    setHovered(false);
   };
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 60 }}
+      initial={{ opacity: 0, y: 36 }}
       whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-60px" }}
       transition={{
-        duration: 0.8,
-        delay: index * 0.12,
+        duration: 0.7,
+        delay: index * 0.1,
         ease: [0.16, 1, 0.3, 1],
       }}
-      viewport={{ once: true, margin: "-80px" }}
+      data-cursor="project"
+      ref={cardRef}
+      onMouseMove={onMouseMove}
+      onMouseLeave={onMouseLeave}
+      onMouseEnter={() => setHovered(true)}
+      style={{
+        perspective: 1000,
+        cursor: "none",
+      }}
     >
-      <div
-        ref={cardRef}
-        onMouseMove={handleMouseMove}
-        onMouseLeave={handleMouseLeave}
+      <motion.div
+        animate={{
+          rotateX: tilt.x,
+          rotateY: tilt.y,
+          scale: hovered ? 1.02 : 1,
+        }}
+        transition={{ type: "spring", stiffness: 300, damping: 28 }}
         style={{
+          backgroundColor: "#0F1115",
+          border: `1px solid ${hovered ? project.accent + "30" : "rgba(255,255,255,0.07)"}`,
+          borderRadius: 20,
+          padding: "36px",
           position: "relative",
-          padding: "40px",
-          border: "1px solid var(--border)",
-          borderRadius: "20px",
-          background: "var(--card-bg)",
-          transition:
-            "transform 0.12s ease-out, border-color 0.3s, background 0.3s",
-          willChange: "transform",
-          cursor: "pointer",
           overflow: "hidden",
-        }}
-        onMouseOver={(e) => {
-          (e.currentTarget as HTMLDivElement).style.borderColor =
-            `${project.accent}30`;
-          (e.currentTarget as HTMLDivElement).style.background =
-            "var(--card-bg-hover)";
-        }}
-        onMouseOut={(e) => {
-          (e.currentTarget as HTMLDivElement).style.borderColor =
-            "var(--border)";
-          (e.currentTarget as HTMLDivElement).style.background =
-            "var(--card-bg)";
+          transformStyle: "preserve-3d",
+          transition: "border-color 0.3s ease",
         }}
       >
-        {/* Corner glow on hover */}
-        <div
-          aria-hidden="true"
+        {/* Number watermark */}
+        <span
           style={{
             position: "absolute",
-            top: "-50px",
-            right: "-50px",
-            width: "200px",
-            height: "200px",
-            borderRadius: "50%",
-            background: `radial-gradient(circle, ${project.accent}15 0%, transparent 70%)`,
-            pointerEvents: "none",
-          }}
-        />
-
-        {/* Header row */}
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "flex-start",
-            marginBottom: "36px",
+            top: 24,
+            right: 28,
+            fontSize: "4rem",
+            fontWeight: 700,
+            color: hovered ? project.accent + "12" : "rgba(255,255,255,0.03)",
+            fontFamily: "var(--font-geist-sans)",
+            lineHeight: 1,
+            userSelect: "none",
+            transition: "color 0.3s ease",
           }}
         >
+          {project.index}
+        </span>
+
+        {/* Featured badge */}
+        {project.featured && (
           <span
             style={{
-              fontFamily: "var(--font-display)",
-              fontSize: "clamp(3rem, 5vw, 4.5rem)",
-              fontWeight: 800,
-              color: "var(--faint)",
-              lineHeight: 1,
-              letterSpacing: "-0.04em",
-              userSelect: "none",
+              display: "inline-block",
+              fontSize: "0.6rem",
+              padding: "3px 10px",
+              borderRadius: 9999,
+              backgroundColor: project.accent + "15",
+              color: project.accent,
+              letterSpacing: "0.1em",
+              textTransform: "uppercase",
+              marginBottom: 20,
             }}
           >
-            {project.num}
+            Featured
           </span>
-
-          <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-            <span
-              style={{
-                fontFamily: "var(--font-body)",
-                fontSize: "12px",
-                color: "var(--faint)",
-                fontWeight: 400,
-              }}
-            >
-              {project.year}
-            </span>
-            {/* Arrow icon */}
-            <div
-              style={{
-                width: "36px",
-                height: "36px",
-                borderRadius: "50%",
-                border: "1px solid var(--border)",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                flexShrink: 0,
-                transition: "border-color 0.25s, background 0.25s",
-              }}
-            >
-              <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-                <path
-                  d="M2 12L12 2M12 2H5M12 2V9"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  style={{ color: "var(--muted)" }}
-                />
-              </svg>
-            </div>
-          </div>
-        </div>
+        )}
 
         {/* Title */}
         <h3
           style={{
-            fontFamily: "var(--font-display)",
-            fontSize: "clamp(1.5rem, 2.5vw, 2rem)",
-            fontWeight: 680,
-            lineHeight: 1.1,
-            letterSpacing: "-0.025em",
-            color: "var(--text)",
-            marginBottom: "16px",
+            fontSize: "1.25rem",
+            fontWeight: 700,
+            color: "#F3F1EC",
+            letterSpacing: "-0.02em",
+            marginBottom: 14,
+            lineHeight: 1.2,
           }}
         >
           {project.title}
@@ -203,215 +177,191 @@ function ProjectCard({
         {/* Description */}
         <p
           style={{
-            fontFamily: "var(--font-body)",
-            fontSize: "14px",
+            fontSize: "0.85rem",
+            color: "rgba(255,255,255,0.42)",
             lineHeight: 1.75,
-            color: "var(--muted)",
-            marginBottom: "28px",
-            fontWeight: 400,
+            marginBottom: 24,
           }}
         >
-          {project.desc}
+          {project.description}
         </p>
 
-        {/* Tags */}
-        <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
-          {project.tags.map((tag) => (
+        {/* Stack tags */}
+        <div
+          style={{
+            display: "flex",
+            flexWrap: "wrap",
+            gap: 7,
+            marginBottom: 32,
+          }}
+        >
+          {project.stack.map((t) => (
             <span
-              key={tag}
-              className="tag"
+              key={t}
               style={{
-                borderColor: `${project.accent}20`,
-                color: project.accent + "99",
+                fontSize: "0.68rem",
+                padding: "4px 10px",
+                borderRadius: 6,
+                backgroundColor: "rgba(255,255,255,0.05)",
+                color: "rgba(255,255,255,0.4)",
+                letterSpacing: "0.04em",
               }}
             >
-              {tag}
+              {t}
             </span>
           ))}
         </div>
-      </div>
+
+        {/* Links */}
+        <div
+          style={{
+            display: "flex",
+            gap: 20,
+            borderTop: "1px solid rgba(255,255,255,0.06)",
+            paddingTop: 20,
+          }}
+        >
+          <a
+            href={project.liveUrl}
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              fontSize: "0.78rem",
+              color: project.accent,
+              textDecoration: "none",
+              letterSpacing: "0.04em",
+              display: "flex",
+              alignItems: "center",
+              gap: 5,
+              transition: "opacity 0.2s",
+            }}
+          >
+            View Live
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+              <path d="M1 11L11 1M11 1H4M11 1V8"
+                stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+            </svg>
+          </a>
+          <a
+            href={project.repoUrl}
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              fontSize: "0.78rem",
+              color: "rgba(255,255,255,0.28)",
+              textDecoration: "none",
+              letterSpacing: "0.04em",
+              display: "flex",
+              alignItems: "center",
+              gap: 5,
+              transition: "color 0.2s",
+            }}
+            onMouseOver={(e) =>
+              ((e.currentTarget as HTMLAnchorElement).style.color = "rgba(255,255,255,0.7)")
+            }
+            onMouseOut={(e) =>
+              ((e.currentTarget as HTMLAnchorElement).style.color = "rgba(255,255,255,0.28)")
+            }
+          >
+            GitHub →
+          </a>
+        </div>
+      </motion.div>
     </motion.div>
   );
 }
 
+// ── Main section ──────────────────────────────────────────────────────────────
 export default function ProjectsSection() {
-  const sectionRef = useRef<HTMLElement>(null);
-
   return (
     <section
       id="projects"
-      ref={sectionRef}
       style={{
-        position: "relative",
-        padding: "120px 0 140px",
-        overflow: "hidden",
-        background: "var(--bg)",
+        backgroundColor: "#0a0a0a",
+        paddingTop: 120,
+        paddingBottom: 140,
       }}
     >
-      {/* Top fade — blends into previous section */}
-      {/* Ambient glow */}
       <div
-        aria-hidden="true"
-        style={{
-          position: "absolute",
-          top: 0,
-          left: 0,
-          right: 0,
-          height: "120px",
-          background: "linear-gradient(to bottom, var(--bg), transparent)",
-          pointerEvents: "none",
-          zIndex: 1,
-        }}
-      />
-      <div
-        aria-hidden="true"
-        style={{
-          position: "absolute",
-          bottom: "20%",
-          left: "50%",
-          transform: "translateX(-50%)",
-          width: "800px",
-          height: "400px",
-          background:
-            "radial-gradient(ellipse, var(--section-glow) 0%, transparent 70%)",
-          pointerEvents: "none",
-        }}
-      />
-
-      <div style={{ maxWidth: "1200px", margin: "0 auto", padding: "0 40px" }}>
-        {/* Chapter label */}
-        <motion.div
-          initial={{ opacity: 0, x: -20 }}
-          whileInView={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-          viewport={{ once: true, margin: "-80px" }}
-          className="chapter-label"
-          style={{ marginBottom: "48px" }}
-        >
-          03 — Work
-        </motion.div>
-
-        {/* Heading row */}
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "flex-end",
-            marginBottom: "72px",
-            gap: "40px",
-            flexWrap: "wrap",
-          }}
-        >
-          <motion.h2
-            initial={{ opacity: 0, y: 40 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
-            viewport={{ once: true, margin: "-60px" }}
-            style={{
-              fontFamily: "var(--font-display)",
-              fontSize: "clamp(2.8rem, 5.5vw, 5.5rem)",
-              fontWeight: 720,
-              lineHeight: 1.0,
-              letterSpacing: "-0.03em",
-              color: "var(--text)",
-            }}
-          >
-            Selected
-            <br />
-            <span style={{ color: "var(--accent)" }}>projects.</span>
-          </motion.h2>
-
-          <motion.p
+        style={{ maxWidth: 1200, margin: "0 auto", padding: "0 48px" }}
+      >
+        {/* Header */}
+        <div style={{ marginBottom: 72 }}>
+          <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
-            viewport={{ once: true, margin: "-60px" }}
+            viewport={{ once: true }}
+            style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}
+          >
+            <motion.div
+              initial={{ scaleX: 0 }}
+              whileInView={{ scaleX: 1 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.7 }}
+              style={{ height: 1, width: 40, backgroundColor: "#E07A5F", transformOrigin: "left" }}
+            />
+            <span style={{
+              fontSize: "0.68rem", letterSpacing: "0.28em",
+              color: "#E07A5F", textTransform: "uppercase",
+              fontFamily: "var(--font-geist-mono)",
+            }}>
+              03 / Projects
+            </span>
+          </motion.div>
+
+          <div
             style={{
-              fontFamily: "var(--font-body)",
-              fontSize: "14px",
-              color: "var(--muted)",
-              maxWidth: "280px",
-              lineHeight: 1.7,
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "flex-end",
+              flexWrap: "wrap",
+              gap: 24,
             }}
           >
-            A curated selection of work that pushed the boundaries of what's
-            possible on the web.
-          </motion.p>
+            <motion.h2
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.1, duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+              style={{
+                fontSize: "clamp(2rem, 4vw, 3rem)",
+                fontWeight: 700,
+                color: "#F3F1EC",
+                letterSpacing: "-0.025em",
+                lineHeight: 1.1,
+              }}
+            >
+              Things I&apos;ve<br />shipped.
+            </motion.h2>
+
+            <motion.p
+              initial={{ opacity: 0 }}
+              whileInView={{ opacity: 1 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.2 }}
+              style={{
+                fontSize: "0.82rem",
+                color: "rgba(255,255,255,0.28)",
+                maxWidth: 260,
+                lineHeight: 1.7,
+              }}
+            >
+              A selection of production work. Hover the cards.
+            </motion.p>
+          </div>
         </div>
 
-        {/* Projects grid */}
+        {/* Grid */}
         <div
           style={{
             display: "grid",
-            gridTemplateColumns: "1fr 1fr",
-            gap: "2px",
+            gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))",
+            gap: 24,
           }}
-          className="projects-grid"
         >
-          {projects.map((project, i) => (
-            <ProjectCard key={project.num} project={project} index={i} />
+          {PROJECTS.map((p, i) => (
+            <ProjectCard key={p.id} project={p} index={i} />
           ))}
         </div>
-
-        {/* View all CTA */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.4, ease: [0.16, 1, 0.3, 1] }}
-          viewport={{ once: true }}
-          style={{ marginTop: "60px", textAlign: "center" }}
-        >
-          <a
-            href="https://github.com/Vishalsomaraju"
-            target="_blank"
-            rel="noopener noreferrer"
-            style={{
-              fontFamily: "var(--font-body)",
-              fontSize: "13px",
-              fontWeight: 500,
-              letterSpacing: "0.06em",
-              color: "var(--muted)",
-              border: "1px solid var(--border)",
-              borderRadius: "99px",
-              padding: "12px 28px",
-              display: "inline-flex",
-              alignItems: "center",
-              gap: "8px",
-              textDecoration: "none",
-              transition: "color 0.25s, border-color 0.25s",
-            }}
-            onMouseOver={(e) => {
-              (e.currentTarget as HTMLAnchorElement).style.color =
-                "var(--text)";
-              (e.currentTarget as HTMLAnchorElement).style.borderColor =
-                "var(--border-strong)";
-            }}
-            onMouseOut={(e) => {
-              (e.currentTarget as HTMLAnchorElement).style.color =
-                "var(--muted)";
-              (e.currentTarget as HTMLAnchorElement).style.borderColor =
-                "var(--border)";
-            }}
-          >
-            View all on GitHub
-            <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-              <path
-                d="M1 11L11 1M11 1H4M11 1V8"
-                stroke="currentColor"
-                strokeWidth="1.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-          </a>
-        </motion.div>
       </div>
-
-      <style>{`
-        @media (max-width: 768px) {
-          .projects-grid { grid-template-columns: 1fr !important; }
-        }
-      `}</style>
     </section>
   );
 }

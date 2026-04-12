@@ -1,6 +1,8 @@
 // ─────────────────────────────────────────────────────────────────────────────
 // FILE: features/experience/stages/stage-about.tsx
 // PURPOSE: About section content, revealed to the right of the laptop in Stage 2
+// NOTE: Uses animate (not whileInView) — inside GSAP-pinned container the
+//       element is always "in view", so IntersectionObserver never fires.
 // ─────────────────────────────────────────────────────────────────────────────
 
 "use client";
@@ -18,7 +20,7 @@ export function StageAbout() {
     <div style={{ maxWidth: 380, padding: "0 8px" }}>
       <motion.p
         initial={{ opacity: 0, x: 20 }}
-        whileInView={{ opacity: 1, x: 0 }}
+        animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.5 }}
         style={{
           fontSize: 10, letterSpacing: "0.24em",
@@ -30,7 +32,7 @@ export function StageAbout() {
 
       <motion.h2
         initial={{ opacity: 0, x: 20 }}
-        whileInView={{ opacity: 1, x: 0 }}
+        animate={{ opacity: 1, x: 0 }}
         transition={{ delay: 0.1, duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
         style={{
           fontSize: "clamp(1.6rem, 2.8vw, 2.2rem)",
@@ -43,7 +45,7 @@ export function StageAbout() {
 
       <motion.p
         initial={{ opacity: 0, x: 20 }}
-        whileInView={{ opacity: 1, x: 0 }}
+        animate={{ opacity: 1, x: 0 }}
         transition={{ delay: 0.2, duration: 0.6 }}
         style={{
           fontSize: "0.88rem", color: "rgba(255,255,255,0.48)",
@@ -57,7 +59,7 @@ export function StageAbout() {
 
       <motion.p
         initial={{ opacity: 0, x: 20 }}
-        whileInView={{ opacity: 1, x: 0 }}
+        animate={{ opacity: 1, x: 0 }}
         transition={{ delay: 0.3, duration: 0.6 }}
         style={{
           fontSize: "0.88rem", color: "rgba(255,255,255,0.38)",
@@ -73,7 +75,7 @@ export function StageAbout() {
           <motion.div
             key={s.label}
             initial={{ opacity: 0, y: 12 }}
-            whileInView={{ opacity: 1, y: 0 }}
+            animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4 + i * 0.1, duration: 0.5 }}
           >
             <div style={{

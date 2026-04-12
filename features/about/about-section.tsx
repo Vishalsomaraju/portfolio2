@@ -1,35 +1,32 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+// ─── features/about/about-section.tsx ────────────────────────────────────────
+// About section. Left: section marker + heading. Right: bio + stats.
+// Scroll reveal via Framer Motion whileInView.
+
+import { useRef, useEffect, useState } from "react";
 import { motion, useInView } from "framer-motion";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
 
-const stats = [
-  { value: 3, suffix: "+", label: "Years building" },
-  { value: 40, suffix: "+", label: "Projects shipped" },
-  { value: 15, suffix: "+", label: "Happy clients" },
-];
-
-function Counter({ value, suffix }: { value: number; suffix: string }) {
+// ── Animated counter ──────────────────────────────────────────────────────────
+function Counter({ to, suffix = "" }: { to: number; suffix?: string }) {
   const [count, setCount] = useState(0);
   const ref = useRef<HTMLSpanElement>(null);
-  const inView = useInView(ref, { once: true, margin: "-100px" });
+  const inView = useInView(ref, { once: true, margin: "-80px" });
 
   useEffect(() => {
     if (!inView) return;
-    let start = 0;
+    const start = Date.now();
     const duration = 1400;
-    const step = (timestamp: number) => {
-      if (!start) start = timestamp;
-      const progress = Math.min((timestamp - start) / duration, 1);
+    const tick = () => {
+      const elapsed = Date.now() - start;
+      const progress = Math.min(elapsed / duration, 1);
+      // ease out cubic
       const eased = 1 - Math.pow(1 - progress, 3);
-      setCount(Math.floor(eased * value));
-      if (progress < 1) requestAnimationFrame(step);
-      else setCount(value);
+      setCount(Math.round(eased * to));
+      if (progress < 1) requestAnimationFrame(tick);
     };
-    requestAnimationFrame(step);
-  }, [inView, value]);
+    requestAnimationFrame(tick);
+  }, [inView, to]);
 
   return (
     <span ref={ref}>
@@ -39,248 +36,279 @@ function Counter({ value, suffix }: { value: number; suffix: string }) {
   );
 }
 
+// ── Fade-up variant ───────────────────────────────────────────────────────────
+const fadeUp = {
+  hidden: { opacity: 0, y: 32 },
+  show:   { opacity: 1, y: 0, transition: { duration: 0.7, ease: [0.16, 1, 0.3, 1] as const } },
+};
+
+const stagger = {
+  hidden: {},
+  show:   { transition: { staggerChildren: 0.1 } },
+};
+
 export default function AboutSection() {
-  const sectionRef = useRef<HTMLElement>(null);
-  const headingRef = useRef<HTMLDivElement>(null);
-  const contentRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    gsap.registerPlugin(ScrollTrigger);
-
-    const ctx = gsap.context(() => {
-      // Heading reveal
-      gsap.from(headingRef.current, {
-        y: 60,
-        opacity: 0,
-        duration: 1,
-        ease: "power4.out",
-        scrollTrigger: {
-          trigger: headingRef.current,
-          start: "top 85%",
-        },
-      });
-
-      // Content reveal
-      gsap.from(contentRef.current?.children ?? [], {
-        y: 40,
-        opacity: 0,
-        duration: 0.8,
-        stagger: 0.12,
-        ease: "power3.out",
-        scrollTrigger: {
-          trigger: contentRef.current,
-          start: "top 80%",
-        },
-      });
-    }, sectionRef);
-
-    return () => ctx.revert();
-  }, []);
-
   return (
     <section
       id="about"
-      ref={sectionRef}
       style={{
+        minHeight: "100vh",
+        backgroundColor: "#0a0a0a",
+        display: "flex",
+        alignItems: "center",
+        padding: "120px 0",
         position: "relative",
-        padding: "120px 0 140px",
         overflow: "hidden",
-        background: "var(--bg)",
       }}
     >
-      {/* Top fade — blends into hero below, no hard line */}
+      {/* Subtle grain texture overlay */}
       <div
-        aria-hidden="true"
         style={{
           position: "absolute",
-          top: 0,
-          left: 0,
-          right: 0,
-          height: "180px",
-          background: "linear-gradient(to bottom, var(--bg), transparent)",
+          inset: 0,
+          backgroundImage:
+            "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E\")",
+          opacity: 0.4,
           pointerEvents: "none",
-          zIndex: 1,
         }}
       />
-      <div style={{ maxWidth: "1200px", margin: "0 auto", padding: "0 40px" }}>
-        {/* Chapter label */}
+
+      <div
+        style={{
+          maxWidth: 1200,
+          margin: "0 auto",
+          padding: "0 48px",
+          width: "100%",
+          display: "grid",
+          gridTemplateColumns: "1fr 1.4fr",
+          gap: 80,
+          alignItems: "start",
+        }}
+        className="grid-cols-1 md:grid-cols-[1fr_1.4fr]"
+      >
+        {/* ── Left col: section marker + big heading ── */}
         <motion.div
-          initial={{ opacity: 0, x: -20 }}
-          whileInView={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-          viewport={{ once: true, margin: "-80px" }}
-          className="chapter-label"
-          style={{ marginBottom: "64px" }}
+          variants={stagger}
+          initial="hidden"
+          whileInView="show"
+          viewport={{ once: true, margin: "-100px" }}
         >
-          01 — About
-        </motion.div>
-
-        {/* Two-column layout */}
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "1fr 1fr",
-            gap: "80px",
-            alignItems: "start",
-          }}
-          className="about-grid"
-        >
-          {/* Left: Headline */}
-          <div ref={headingRef}>
-            <h2
-              style={{
-                fontFamily: "var(--font-display)",
-                fontSize: "clamp(2.8rem, 5vw, 5rem)",
-                fontWeight: 720,
-                lineHeight: 1.0,
-                letterSpacing: "-0.03em",
-                color: "var(--text)",
-                marginBottom: "32px",
-              }}
-            >
-              I turn chaos
-              <br />
-              into systems
-              <br />
-              <em style={{ fontStyle: "italic", color: "var(--accent)" }}>
-                that scale.
-              </em>
-            </h2>
-
-            {/* Accent rule */}
-            <div className="hr-accent" style={{ marginBottom: "32px" }} />
-
-            {/* Stats */}
-            <div style={{ display: "flex", gap: "48px" }}>
-              {stats.map((stat) => (
-                <div key={stat.label}>
-                  <div
-                    style={{
-                      fontFamily: "var(--font-display)",
-                      fontSize: "clamp(2rem, 3.5vw, 3rem)",
-                      fontWeight: 700,
-                      letterSpacing: "-0.03em",
-                      color: "var(--accent)",
-                      lineHeight: 1,
-                    }}
-                  >
-                    <Counter value={stat.value} suffix={stat.suffix} />
-                  </div>
-                  <div
-                    style={{
-                      fontFamily: "var(--font-body)",
-                      fontSize: "12px",
-                      fontWeight: 500,
-                      letterSpacing: "0.1em",
-                      textTransform: "uppercase",
-                      color: "var(--faint)",
-                      marginTop: "6px",
-                    }}
-                  >
-                    {stat.label}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Right: Content */}
-          <div ref={contentRef} style={{ paddingTop: "8px" }}>
-            <p
-              style={{
-                fontFamily: "var(--font-body)",
-                fontSize: "clamp(1rem, 1.4vw, 1.15rem)",
-                fontWeight: 400,
-                lineHeight: 1.85,
-                color: "var(--muted)",
-                marginBottom: "28px",
-              }}
-            >
-              With 3+ years building production-grade applications, I sit at the
-              intersection of engineering precision and design craft. I don't
-              just write code — I architect experiences that feel inevitable in
-              hindsight.
-            </p>
-
-            <p
-              style={{
-                fontFamily: "var(--font-body)",
-                fontSize: "clamp(1rem, 1.4vw, 1.15rem)",
-                fontWeight: 400,
-                lineHeight: 1.85,
-                color: "rgba(240,237,232,0.65)",
-                marginBottom: "40px",
-              }}
-            >
-              My work lives at the edge of what's possible with modern web
-              technology — from WebGL particle systems to real-time data
-              pipelines. I believe the best software is indistinguishable from
-              magic.
-            </p>
-
-            {/* Qualities */}
+          {/* Chapter marker */}
+          <motion.div variants={fadeUp} style={{ marginBottom: 28 }}>
             <div
               style={{
-                display: "grid",
-                gridTemplateColumns: "1fr 1fr",
-                gap: "16px",
+                display: "flex",
+                alignItems: "center",
+                gap: 12,
+                marginBottom: 8,
               }}
             >
-              {[
-                "Full-Stack Engineering",
-                "3D & WebGL Experiences",
-                "System Architecture",
-                "Performance Obsessed",
-              ].map((quality) => (
+              {/* Animated line */}
+              <motion.div
+                initial={{ scaleX: 0 }}
+                whileInView={{ scaleX: 1 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] as [number,number,number,number] }}
+                style={{
+                  height: 1,
+                  width: 40,
+                  backgroundColor: "#E07A5F",
+                  transformOrigin: "left",
+                }}
+              />
+              <span
+                style={{
+                  fontSize: "0.68rem",
+                  letterSpacing: "0.28em",
+                  color: "#E07A5F",
+                  textTransform: "uppercase",
+                  fontFamily: "var(--font-geist-mono)",
+                }}
+              >
+                01 / About
+              </span>
+            </div>
+          </motion.div>
+
+          <motion.h2
+            variants={fadeUp}
+            style={{
+              fontSize: "clamp(2.4rem, 5vw, 3.8rem)",
+              fontWeight: 700,
+              color: "#F3F1EC",
+              lineHeight: 1.05,
+              letterSpacing: "-0.03em",
+              marginBottom: 0,
+            }}
+          >
+            I build
+            <br />
+            <span style={{ color: "#E07A5F" }}>systems,</span>
+            <br />
+            not just
+            <br />
+            websites.
+          </motion.h2>
+
+          {/* Stats row */}
+          <motion.div
+            variants={fadeUp}
+            style={{
+              display: "flex",
+              gap: 36,
+              marginTop: 56,
+              paddingTop: 36,
+              borderTop: "1px solid rgba(255,255,255,0.07)",
+            }}
+          >
+            {[
+              { value: 3,  suffix: "+", label: "Years" },
+              { value: 20, suffix: "+", label: "Projects" },
+              { value: 8,  suffix: "k+", label: "Commits" },
+            ].map((s) => (
+              <div key={s.label}>
                 <div
-                  key={quality}
                   style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "10px",
-                    padding: "14px 18px",
-                    border: "1px solid var(--border)",
-                    borderRadius: "10px",
-                    transition: "border-color 0.25s",
-                  }}
-                  onMouseOver={(e) => {
-                    (e.currentTarget as HTMLDivElement).style.borderColor =
-                      "var(--accent-border)";
-                  }}
-                  onMouseOut={(e) => {
-                    (e.currentTarget as HTMLDivElement).style.borderColor =
-                      "var(--border)";
+                    fontSize: "1.9rem",
+                    fontWeight: 700,
+                    color: "#E07A5F",
+                    lineHeight: 1,
+                    fontFamily: "var(--font-geist-sans)",
                   }}
                 >
-                  <span
-                    style={{
-                      width: "4px",
-                      height: "4px",
-                      borderRadius: "50%",
-                      background: "var(--accent)",
-                      flexShrink: 0,
-                    }}
-                  />
-                  <span
-                    style={{
-                      fontFamily: "var(--font-body)",
-                      fontSize: "12px",
-                      fontWeight: 500,
-                      color: "var(--muted)",
-                    }}
-                  >
-                    {quality}
-                  </span>
+                  <Counter to={s.value} suffix={s.suffix} />
                 </div>
+                <div
+                  style={{
+                    fontSize: "0.68rem",
+                    color: "rgba(255,255,255,0.3)",
+                    marginTop: 5,
+                    letterSpacing: "0.08em",
+                    textTransform: "uppercase",
+                  }}
+                >
+                  {s.label}
+                </div>
+              </div>
+            ))}
+          </motion.div>
+        </motion.div>
+
+        {/* ── Right col: bio text ── */}
+        <motion.div
+          variants={stagger}
+          initial="hidden"
+          whileInView="show"
+          viewport={{ once: true, margin: "-100px" }}
+          style={{ paddingTop: 8 }}
+        >
+          <motion.p
+            variants={fadeUp}
+            style={{
+              fontSize: "1.05rem",
+              color: "rgba(255,255,255,0.55)",
+              lineHeight: 1.85,
+              marginBottom: 24,
+              fontFamily: "var(--font-geist-sans)",
+            }}
+          >
+            Full-stack developer based in Hyderabad. I care deeply about craft —
+            from the precision of a PostgreSQL schema to the final pixel of a
+            micro-interaction. Every decision is intentional. Every transition
+            is earned.
+          </motion.p>
+
+          <motion.p
+            variants={fadeUp}
+            style={{
+              fontSize: "1.05rem",
+              color: "rgba(255,255,255,0.38)",
+              lineHeight: 1.85,
+              marginBottom: 40,
+            }}
+          >
+            I specialize in React ecosystems, Node.js backends, and cinematic
+            web experiences that make engineers and designers both stop and ask
+            &ldquo;how did they do that.&rdquo;
+          </motion.p>
+
+          {/* Skills chips preview */}
+          <motion.div variants={fadeUp}>
+            <p
+              style={{
+                fontSize: "0.68rem",
+                letterSpacing: "0.22em",
+                color: "rgba(255,255,255,0.25)",
+                textTransform: "uppercase",
+                marginBottom: 14,
+              }}
+            >
+              Currently working with
+            </p>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+              {[
+                "Next.js", "TypeScript", "React Three Fiber",
+                "GSAP", "PostgreSQL", "Node.js",
+              ].map((t) => (
+                <span
+                  key={t}
+                  style={{
+                    fontSize: "0.75rem",
+                    padding: "5px 12px",
+                    borderRadius: 9999,
+                    border: "1px solid rgba(255,255,255,0.1)",
+                    color: "rgba(255,255,255,0.5)",
+                    letterSpacing: "0.03em",
+                  }}
+                >
+                  {t}
+                </span>
               ))}
             </div>
-          </div>
-        </div>
+          </motion.div>
+
+          {/* Availability badge */}
+          <motion.div
+            variants={fadeUp}
+            style={{
+              marginTop: 44,
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 10,
+              padding: "10px 18px",
+              borderRadius: 9999,
+              backgroundColor: "rgba(224,122,95,0.08)",
+              border: "1px solid rgba(224,122,95,0.2)",
+            }}
+          >
+            <span
+              style={{
+                width: 7,
+                height: 7,
+                borderRadius: "50%",
+                backgroundColor: "#4ADE80",
+                boxShadow: "0 0 8px rgba(74,222,128,0.6)",
+                display: "inline-block",
+                animation: "pulse 2s ease-in-out infinite",
+              }}
+            />
+            <span
+              style={{
+                fontSize: "0.78rem",
+                color: "rgba(255,255,255,0.5)",
+                letterSpacing: "0.05em",
+              }}
+            >
+              Available for new projects
+            </span>
+          </motion.div>
+        </motion.div>
       </div>
 
       <style>{`
-        @media (max-width: 768px) {
-          .about-grid { grid-template-columns: 1fr !important; gap: 60px !important; }
+        @keyframes pulse {
+          0%, 100% { opacity: 1; transform: scale(1); }
+          50% { opacity: 0.6; transform: scale(0.85); }
         }
       `}</style>
     </section>

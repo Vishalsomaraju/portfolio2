@@ -1,12 +1,18 @@
 "use client";
 
 import { useEffect } from "react";
+import { usePathname } from "next/navigation";
 import Lenis from "lenis";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 export function LenisProvider({ children }: { children: React.ReactNode }) {
+  const pathname = usePathname();
+
   useEffect(() => {
+    // Skip Lenis on /experience — GSAP ScrollTrigger pins need native scroll
+    if (pathname?.startsWith("/experience")) return;
+
     gsap.registerPlugin(ScrollTrigger);
 
     const lenis = new Lenis({
@@ -41,7 +47,7 @@ export function LenisProvider({ children }: { children: React.ReactNode }) {
       gsap.ticker.remove((time) => lenis.raf(time * 1000));
       lenis.destroy();
     };
-  }, []);
+  }, [pathname]);
 
   return <>{children}</>;
 }

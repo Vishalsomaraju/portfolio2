@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTheme } from "@/providers/theme-provider";
 
@@ -66,6 +67,7 @@ function IconX() {
 
 // ─── Component ────────────────────────────────────────────────────────────────
 export function Nav() {
+  const pathname                  = usePathname();
   const [scrolled,  setScrolled]  = useState(false);
   const [menuOpen,  setMenuOpen]  = useState(false);
   const [mounted,   setMounted]   = useState(false);
@@ -86,6 +88,9 @@ export function Nav() {
     document.body.style.overflow = menuOpen ? "hidden" : "";
     return () => { document.body.style.overflow = ""; };
   }, [menuOpen]);
+
+  // Don't render the global nav on the /experience page — it has its own HUD
+  if (pathname?.startsWith("/experience")) return null;
 
   const handleNavClick = (href: string) => {
     if (menuOpen) {

@@ -180,8 +180,10 @@ export function ScrollStages() {
     { scope: containerRef, dependencies: [] }
   );
 
-  const handleContactSubmit = async () => {
-    // TODO: wire to email API (e.g. Resend)
+  const handleContactSubmit = async (_data: {
+    name: string; email: string; message: string;
+  }) => {
+    // TODO: wire to email API (e.g. Resend) — data contains name/email/message
     await new Promise((r) => setTimeout(r, 1000));
   };
 

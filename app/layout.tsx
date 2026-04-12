@@ -9,13 +9,27 @@ import { Grain } from "@/components/ui/grain";
 import { Nav } from "@/components/ui/nav";
 import { Preloader } from "@/components/ui/preloader";
 
+import { Bricolage_Grotesque, DM_Sans } from "next/font/google";
+
+const bricolageGrotesque = Bricolage_Grotesque({
+  subsets: ["latin"],
+  variable: "--font-display",
+  display: "swap",
+});
+
+const dmSans = DM_Sans({
+  subsets: ["latin"],
+  variable: "--font-body",
+  display: "swap",
+});
+
 export default function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" suppressHydrationWarning className={`${bricolageGrotesque.variable} ${dmSans.variable}`}>
       <head>
         {/* Blocking script — runs before first paint to prevent theme flash */}
         <script
